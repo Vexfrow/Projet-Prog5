@@ -1,0 +1,2 @@
+#Ne pas inclure les .o
+*.o
