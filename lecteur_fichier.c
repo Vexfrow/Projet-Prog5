@@ -48,17 +48,14 @@ char *getDataEncoding(unsigned char c){
     return dataEncoding;
 }
 
-#define EV_NONE 0
-#define EV_CURRENT 1
-//Permet de récuperer la version du fichier
 char *getVersion(unsigned char c){
     char *version;
     switch (c) {
         case EV_NONE:
-            version="1 (Current Version)";
+            version="0 (Invalid Version)";
             break;
         case EV_CURRENT:
-            version="0 (Invalid Version)";
+            version="1 (Current Version)";
             break;
         default:
             fprintf(stderr, "ERREUR: Valeur de version invalide: e_ident[EI_VERSION] = 0x%.2hx", c);
@@ -70,35 +67,11 @@ char *getVersion(unsigned char c){
 
 
 //TODO MAXIME
-//Permet de récuperer la manière dont sont encodées les données
 char *getOSABI(unsigned char c){
-    char *OSABI="UNIX - temp";
-    /*switch (c) {
-        case 0: 
-            OSABI = "Invalid data encoding";
-            break;
-        case 1:
-            OSABI = "2's complement values, little endian";
-            break;
-        case 2 :
-            OSABI = "2's complement values, big endian";
-            break;
-        default:
-            fprintf(stderr, "Octet de l'encodage de OS/ABI invalide");
-            exit(1);
-            break;
-    }*/
+    char *OSABI="UNIX - TODO";
     return OSABI;
 }
 
-#define ET_NONE 0
-#define ET_REL 1
-#define ET_EXEC 2
-#define ET_DYN 3
-#define ET_CORE 4
-#define ET_LOPROC 0xff00
-#define ET_HIPROC 0xffff
-//Permet de récuperer le type
 char *getType(uint16_t c){
     char *type;
     switch (c) {
@@ -131,17 +104,6 @@ char *getType(uint16_t c){
     return type;
 }
 
-#define EM_NONE 0
-#define EM_M32 1 
-#define EM_SPARC 2
-#define EM_386 3
-#define EM_68K 4
-#define EM_88K 5
-#define EM_860 7
-#define EM_MIPS 8
-#define EM_MIPS_RS4_BE 10
-#define RESERVED 11 ... 16
-//Permet de récuperer la machine
 char *getMachine(uint16_t c){
     char *machine;
     switch (c) {
@@ -184,18 +146,6 @@ char *getMachine(uint16_t c){
     return machine;
 }
 
-
-#define EI_MAG0 0x00
-#define EI_MAG1 0x01
-#define EI_MAG2 0x02
-#define EI_MAG3 0x03
-#define EI_CLASS 0x04
-#define EI_DATA 0x05
-#define EI_VERSION 0x06
-#define EI_OSABI 0x07
-#define EI_ABIVERSION 0x08
-#define EI_PAD 0x09
-// Affiche le header (similaire à 'arm-none-eabi-readelf -a {file_name}.o')
 void afficherHeader(ELF_Header *Header){
     printf("ELF Header :\n");
     printf("  Magic : ");
