@@ -109,3 +109,4 @@ ELF_Symbol *tableSymbol(FILE *fichier, Elf32_Section_Header *sectionHead, int ta
     remplirSymbol(fichier, table, taille);
     return table;
 }
+

@@ -61,10 +61,10 @@ ELF_Header *init (FILE *fichier);
 
 void init_section_header(FILE *fichier, uint16_t nb, unsigned int adrStart, Elf32_Section_Header *tab);
 
-void afficher_sect(Elf32_Section_Header *tab, uint16_t nb);
 
 ELF_Symbol *tableSymbol(FILE *fichier, Elf32_Section_Header *sectionHead, int tailleSectionTable);
 
 ELF_Symbol *remplirSymbol(FILE *fichier, ELF_Symbol *table, int taille);
+
 
 #endif
