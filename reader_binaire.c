@@ -1,6 +1,6 @@
 #include "reader_binaire.h"
 
-unsigned char lectureOctet(FILE *fichier){
+unsigned char lecture1octet(FILE *fichier){
     unsigned char res;
     fread(&res,1,1,fichier);
     return res;

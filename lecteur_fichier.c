@@ -13,7 +13,7 @@ void afficher(ELF_Header *Header, int taille){
 
 void remplirMagic(FILE *fichier, ELF_Header *Header, int taille){
     for(int i = 0; i < taille; i++){
-        Header->e_ident[i] = lectureOctet(fichier);
+        Header->e_ident[i] = lecture1octet(fichier);
     }
 }
 
@@ -26,7 +26,21 @@ ELF_Header *init(FILE *fichier){
         exit(1);
     }
     remplirMagic(fichier, elf, 16);
+    elf->e_type = lecture2octet(fichier);
+    elf->e_machine = lecture2octet(fichier);
+    elf->e_version = lecture4octet(fichier);
+    elf->e_entry = lecture4octet(fichier);
+    elf->e_phoff = lecture4octet(fichier);
+    elf->e_shoff = lecture4octet(fichier);
+    elf->e_flags = lecture4octet(fichier);
+    elf->e_ehsize = lecture2octet(fichier);
+    elf->e_phentsize = lecture2octet(fichier);
+    elf->e_phnum = lecture2octet(fichier);
+    elf->e_shentsize = lecture2octet(fichier);
+    elf->e_shnum = lecture2octet(fichier);
+    elf->e_shstrndx = lecture2octet(fichier);
 
     return elf;
-    
 }
+
+

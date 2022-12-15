@@ -25,6 +25,9 @@ typedef struct {
 } ELF_Header;
 
 
+
+
+
 void afficher(ELF_Header *Header, int taille);
 
 void remplirMagic(FILE *fichier, ELF_Header *Header, int taille);

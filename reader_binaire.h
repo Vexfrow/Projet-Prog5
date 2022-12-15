@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-unsigned char lectureOctet(FILE *fichier);
+unsigned char lecture1octet(FILE *fichier);
 
 uint16_t lecture2octet(FILE *fichier);
 
