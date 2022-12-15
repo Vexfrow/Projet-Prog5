@@ -5,7 +5,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #define EI_NIDENT 16
-
+#define SHT_SYMTAB 2
+#define SHT_STRTAB 3
 
 typedef struct {
     unsigned char e_ident[EI_NIDENT];
@@ -24,8 +25,7 @@ typedef struct {
     uint16_t e_shstrndx;
 } ELF_Header;
 
-
-typedef struct {
+typedef struct{
     unsigned int sh_name;
     unsigned int sh_type;
     unsigned int sh_flags;
@@ -40,15 +40,33 @@ typedef struct {
 
 
 
+typedef struct {
+    int st_name;
+    int st_value;
+    int st_size;
+    unsigned char st_info;
+    unsigned char st_other;
+    uint16_t st_shndx;
+} ELF_Symbol;
+
+
+
+
 
 void afficher(ELF_Header *Header, int taille);
 
 void remplirMagic(FILE *fichier, ELF_Header *Header, int taille);
+
+ELF_Symbol *tableSymbol(Elf32_Section_Header *sectionHead, int tailleSectionTable);
 
 ELF_Header *init (FILE *fichier);
 
 void init_section_header(FILE *fichier, uint16_t nb, unsigned int adrStart, Elf32_Section_Header *tab);
 
 void afficher_sect(Elf32_Section_Header *tab, uint16_t nb);
+
+ELF_Symbol *tableSymbol(FILE *fichier, Elf32_Section_Header *sectionHead, int tailleSectionTable);
+
+ELF_Symbol *remplirSymbol(FILE *fichier, ELF_Symbol *table, int taille);
 
 #endif
