@@ -219,10 +219,6 @@ void afficherHeader(ELF_Header *Header){
 
 
 
-
-
-
-
 ELF_Header *init(FILE *fichier){
     //Ajouter les Macros pour N_IDENT 16
     ELF_Header *elf = malloc(sizeof(ELF_Header));
@@ -243,6 +239,7 @@ ELF_Header *init(FILE *fichier){
     elf->e_phnum = lecture2octet(fichier);
     elf->e_shentsize = lecture2octet(fichier);
     elf->e_shnum = lecture2octet(fichier);
+    fprintf(stderr, "e_shnum = %hu", elf->e_ehsize);
     elf->e_shstrndx = lecture2octet(fichier);
 
     return elf;
@@ -326,5 +323,6 @@ int tailleTableSymbol(Elf32_Section_Header *sectionHead, int tailleSectionTable)
     while( i < tailleSectionTable && sectionHead[i].sh_type != SHT_SYMTAB){
         i++;
     }
+    fprintf(stderr,"Section head : %d", sectionHead[i].sh_size);
     return sectionHead[i].sh_size / 16;
 }

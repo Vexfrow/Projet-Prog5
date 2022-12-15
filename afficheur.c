@@ -1,12 +1,15 @@
 #include "afficheur.h"
 
 void afficherSymbol(ELF_Symbol *table, int taille){
-    fprintf(stdout, "Num : Value\tSize\tType\tBind\tVis\tNdx Name");
-    char *type="";
-    char *bind="";
-    char *ndx="";
+    fprintf(stdout, "Num : Value\tSize\tType\tBind\tVis\tNdx Name\n");
+        fprintf(stdout, "taille = %d\n", taille );
+
     for(int i =0; i < taille; i++){
+        fprintf(stdout, "taille = %d\n", taille );
         //Calcul du binding
+            char *type="";
+            char *bind="";
+            char *ndx="";
         switch(table[i].st_info >> 4){
             case 0:
                 bind="LOCAL";
@@ -86,7 +89,7 @@ void afficherSymbol(ELF_Symbol *table, int taille){
             }
 
         }
-        fprintf(stdout, "%d: %.8x %.8x DEFAULT %.8x ", i, table[i].st_value, table[i].st_size, table[i].st_name);
+        fprintf(stdout, "%d: %.8x %.8x DEFAULT %.8x \n", i, table[i].st_value, table[i].st_size, table[i].st_name);
     }      
 }
 
