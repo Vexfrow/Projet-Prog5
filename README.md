@@ -1,9 +1,20 @@
-# Projet-Prog5
-Projet de Programmation5 du groupe 1
+#Projet-Prog5
+##Projet de Programmation5 du groupe 1
 
-Jour 1:
+###Jour 2:
 
-Avancement:
+#####Avancement:
+Grande partie de l'affichage du header fait:
+
+#####Questions:
+    Maxime:
+    >Pour l'affichage header: Grand nombre de machine et OS/ABI, tous les traiter dans un switch case ?
+
+-----------------------------------------------
+
+###Jour 1:
+
+######Avancement:
 
 ELF Header
 
@@ -46,7 +57,7 @@ Les sections sont contigües et il y en  a e_shnum.
 
 
 
-Questions: 
-    - Aucune informations sur le Flag I ? On se limite au 4 flags de la doc ou plus ?
-    - Ou se trouve sh_entsize? Doit-on le preciser dans notre sortie, car il n'apparait aps dans readElf?
-    - Comment savoir en quelle machine on est ? ARM ? 
+#####Questions: 
+>Aucune informations sur le Flag I ? On se limite au 4 flags de la doc ou plus ?
+>Ou se trouve sh_entsize? Doit-on le preciser dans notre sortie, car il n'apparait aps dans readElf?
+>Comment savoir en quelle machine on est ? ARM ? 
