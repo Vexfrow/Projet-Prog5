@@ -25,6 +25,19 @@ typedef struct {
 } ELF_Header;
 
 
+typedef struct {
+    unsigned int sh_name;
+    unsigned int sh_type;
+    unsigned int sh_flags;
+    unsigned int sh_addr;
+    unsigned int sh_offset;
+    unsigned int sh_size;
+    unsigned int sh_link;
+    unsigned int sh_info;
+    unsigned int sh_addralign;
+    unsigned int sh_entsize;
+} Elf32_Section_Header;
+
 
 
 
@@ -33,5 +46,7 @@ void afficher(ELF_Header *Header, int taille);
 void remplirMagic(FILE *fichier, ELF_Header *Header, int taille);
 
 ELF_Header *init (FILE *fichier);
+
+Elf32_Section_Header *init_section_header(FILE *fichier, uint16_t nb, unsigned int adrStart);
 
 #endif

@@ -43,4 +43,8 @@ ELF_Header *init(FILE *fichier){
     return elf;
 }
 
+Elf32_Section_Header *init_section_header(FILE *fichier, uint16_t nb, unsigned int adrStart){
+    return NULL;
+}
+
 
