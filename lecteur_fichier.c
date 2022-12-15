@@ -44,3 +44,9 @@ ELF_Header *init(FILE *fichier){
 }
 
 
+ELF_Symbol *tableSymbol(Elf32_Section_Header *sectionHead, int tailleSectionTable){
+    int i = 0;
+    while( i < tailleSectionTable && sectionHead[i] != SHT_SYMTAB){
+        i++;
+    }
+}
