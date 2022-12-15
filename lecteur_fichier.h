@@ -51,11 +51,11 @@ typedef struct{
 
 
 
-void afficher(ELF_Header *Header, int taille);
+void afficherHeader(ELF_Header *Header);
 
 void remplirMagic(FILE *fichier, ELF_Header *Header, int taille);
 
-ELF_Symbol *tableSymbol(Elf32_Symbol_Section *sectionHead, int tailleSectionTable);
+//ELF_Symbol *tableSymbol(Elf32_Symbol_Section *sectionHead, int tailleSectionTable);
 
 ELF_Header *init (FILE *fichier);
 
