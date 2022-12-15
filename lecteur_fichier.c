@@ -2,17 +2,12 @@
 #include "reader_binaire.h"
 #include <string.h>
 
-//Permet de remplir le "Magic number"
 void remplirMagic(FILE *fichier, ELF_Header *Header, int taille){
     for(int i = 0; i < taille; i++){
         Header->e_ident[i] = lecture1octet(fichier);
     }
 }
 
-#define ELFCLASSNONE 0
-#define ELFCLASS32 1
-#define ELFCLASS64 2
-//Permet de récupèrer la classe de l'ELF
 char *getClass(unsigned char c){
     char *class;
     switch (c) {
@@ -33,10 +28,6 @@ char *getClass(unsigned char c){
     return class;
 }
 
-#define ELFDATANONE 0
-#define ELFDATA2LSB 1
-#define ELFDATA2MSB 2
-//Permet de récuperer la manière dont sont encodées les données
 char *getDataEncoding(unsigned char c){
     char *dataEncoding;
     switch (c) {
