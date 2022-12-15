@@ -47,7 +47,6 @@ ELF_Header *init(FILE *fichier){
 
 
 void init_section_header(FILE *fichier, uint16_t nb, unsigned int adrStart, Elf32_Section_Header *tab){
-    printf("adrstart est de %x    ", adrStart);
     int i = 0;
     while ( i < nb){
         int j = 0;
@@ -79,25 +78,7 @@ void init_section_header(FILE *fichier, uint16_t nb, unsigned int adrStart, Elf3
         i++;
     }
 }
-void afficher_sect(Elf32_Section_Header *tab, uint16_t nb){
 
-
-    int i = 0;
-    printf("%d est nb   ", nb);
-    while(i<nb){
-        printf("sh_name:%x  ",tab[i].sh_name);
-        printf("type:%x  ",tab[i].sh_type);
-        printf("sh_flags:%x  ",tab[i].sh_flags);
-        printf("sh_addr:%x  ",tab[i].sh_addr);
-        printf("sh_offset:%x  ",tab[i].sh_offset);
-        printf("sh_size:%x  ",tab[i].sh_size);
-        printf("sh_link:%x  ",tab[i].sh_link);
-        printf("sh_info:%x  ",tab[i].sh_info);
-        printf("sh_addralign:%x  ",tab[i].sh_addralign);
-        printf("sh_entsize:%x  ",tab[i].sh_entsize);
-        i++;
-        printf(" \n ");
-    }
 
 
 ELF_Symbol *remplirSymbol(FILE *fichier, ELF_Symbol *table, int taille){
@@ -106,8 +87,8 @@ ELF_Symbol *remplirSymbol(FILE *fichier, ELF_Symbol *table, int taille){
         table[i].st_value = lecture4octet(fichier);
         table[i].st_size = lecture4octet(fichier);
         table[i].st_info = lecture1octet(fichier);
-        table[i].st_others = lecture1octet(fichier);
-        table[i].shndx = lecture2octet(fichier);
+        table[i].st_other = lecture1octet(fichier);
+        table[i].st_shndx = lecture2octet(fichier);
     } 
     return table;      
 }

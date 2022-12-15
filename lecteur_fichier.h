@@ -57,8 +57,6 @@ void afficher(ELF_Header *Header, int taille);
 
 void remplirMagic(FILE *fichier, ELF_Header *Header, int taille);
 
-ELF_Symbol *tableSymbol(Elf32_Section_Header *sectionHead, int tailleSectionTable);
-
 ELF_Header *init (FILE *fichier);
 
 void init_section_header(FILE *fichier, uint16_t nb, unsigned int adrStart, Elf32_Section_Header *tab);
