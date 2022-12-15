@@ -43,6 +43,10 @@ ELF_Header *init(FILE *fichier){
     return elf;
 }
 
+Elf32_Section_Header *init_section_header(FILE *fichier, uint16_t nb, unsigned int adrStart){
+    return NULL;
+}
+
 
 ELF_Symbol *tableSymbol(Elf32_Section_Header *sectionHead, int tailleSectionTable){
     int i = 0;

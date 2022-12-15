@@ -1,2 +1,5 @@
 #Ne pas inclure les .o
 *.o
+
+#ignore le main executable
+main
