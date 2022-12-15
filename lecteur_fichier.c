@@ -3,12 +3,7 @@
 
 
 
-void afficher(ELF_Header *Header, int taille){
-    for(int i =0; i < taille; i++){
-        printf("%.2hx ", Header->e_ident[i]);
-    }
-    printf("\n");
-}
+
 
 
 void remplirMagic(FILE *fichier, ELF_Header *Header, int taille){
@@ -57,19 +52,23 @@ ELF_Symbol *remplirSymbol(FILE *fichier, ELF_Symbol *table, int taille){
         table[i].st_value = lecture4octet(fichier);
         table[i].st_size = lecture4octet(fichier);
         table[i].st_info = lecture1octet(fichier);
-        table[i].st_others = lecture1octet(fichier);
-        table[i].shndx = lecture2octet(fichier);
+        table[i].st_other = lecture1octet(fichier);
+        table[i].st_shndx = lecture2octet(fichier);
     } 
     return table;      
 }
 
 
 ELF_Symbol *tableSymbol(FILE *fichier, Elf32_Section_Header *sectionHead, int tailleSectionTable){
+    if(sectionHead == NULL){
+        fprintf(stderr, "Pas de table des sections(tableSymbol)");
+        exit(3);
+    }
     int i = 0;
     while( i < tailleSectionTable && sectionHead[i].sh_type != SHT_SYMTAB){
         i++;
     }
-    int taille = sectionHead[i].sh_size / 16;
+    int taille = tailleTableSymbol(sectionHead, tailleSectionTable);
     ELF_Symbol *table = malloc(sizeof(ELF_Symbol)*taille);
     if(table == NULL){
         fprintf(stderr, "Pas assez de place mémoire");
@@ -78,4 +77,16 @@ ELF_Symbol *tableSymbol(FILE *fichier, Elf32_Section_Header *sectionHead, int ta
     fseek(fichier, sectionHead[i].sh_offset, 0);
     remplirSymbol(fichier, table, taille);
     return table;
+}
+
+int tailleTableSymbol(Elf32_Section_Header *sectionHead, int tailleSectionTable){
+    if(sectionHead == NULL){
+        fprintf(stderr, "Pas de table des sections (tailleTableSymbol)");
+        exit(3);
+    }
+    int i = 0;
+    while( i < tailleSectionTable && sectionHead[i].sh_type != SHT_SYMTAB){
+        i++;
+    }
+    return sectionHead[i].sh_size / 16;
 }
