@@ -47,6 +47,8 @@ void remplirMagic(FILE *fichier, ELF_Header *Header, int taille);
 
 ELF_Header *init (FILE *fichier);
 
-Elf32_Section_Header *init_section_header(FILE *fichier, uint16_t nb, unsigned int adrStart);
+void init_section_header(FILE *fichier, uint16_t nb, unsigned int adrStart, Elf32_Section_Header *tab);
+
+void afficher_sect(Elf32_Section_Header *tab, uint16_t nb);
 
 #endif

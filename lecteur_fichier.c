@@ -43,8 +43,58 @@ ELF_Header *init(FILE *fichier){
     return elf;
 }
 
-Elf32_Section_Header *init_section_header(FILE *fichier, uint16_t nb, unsigned int adrStart){
-    return NULL;
+
+void init_section_header(FILE *fichier, uint16_t nb, unsigned int adrStart, Elf32_Section_Header *tab){
+    printf("adrstart est de %x    ", adrStart);
+    int i = 0;
+    while ( i < nb){
+        int j = 0;
+        while(j< 10){
+            fseek(fichier, adrStart +40*(i), SEEK_SET);
+            int val = lecture4octet(fichier);
+            tab[i].sh_name = val;
+            val = lecture4octet(fichier);
+            tab[i].sh_type = val;
+            val = lecture4octet(fichier);
+            tab[i].sh_flags = val;
+            val = lecture4octet(fichier);
+            tab[i].sh_addr = val;
+            val = lecture4octet(fichier);
+            tab[i].sh_offset = val;
+            val = lecture4octet(fichier);
+            tab[i].sh_size = val;
+            val = lecture4octet(fichier);
+            tab[i].sh_link = val;
+            val = lecture4octet(fichier);
+            tab[i].sh_info = val;
+            val = lecture4octet(fichier);
+            tab[i].sh_addralign = val;
+            val = lecture4octet(fichier);
+            tab[i].sh_entsize = val;
+
+            j++; 
+        }
+        i++;
+    }
 }
+void afficher_sect(Elf32_Section_Header *tab, uint16_t nb){
 
 
+    int i = 0;
+    printf("%d est nb   ", nb);
+    while(i<nb){
+        printf("sh_name:%x  ",tab[i].sh_name);
+        printf("type:%x  ",tab[i].sh_type);
+        printf("sh_flags:%x  ",tab[i].sh_flags);
+        printf("sh_addr:%x  ",tab[i].sh_addr);
+        printf("sh_offset:%x  ",tab[i].sh_offset);
+        printf("sh_size:%x  ",tab[i].sh_size);
+        printf("sh_link:%x  ",tab[i].sh_link);
+        printf("sh_info:%x  ",tab[i].sh_info);
+        printf("sh_addralign:%x  ",tab[i].sh_addralign);
+        printf("sh_entsize:%x  ",tab[i].sh_entsize);
+        i++;
+        printf(" \n ");
+    }
+
+}
