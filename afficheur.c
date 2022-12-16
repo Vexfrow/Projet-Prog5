@@ -1,5 +1,118 @@
 #include "afficheur.h"
 
+char *binding(char bind){
+    switch(bind){
+            case 0:
+                return "LOCAL";
+                break;
+            case 1:
+                return "GLOBAL";
+                break;
+            case 2:
+                return "WEAK";
+                break;
+            case 13:
+                return "LOPROC";
+                break;
+            case 15:
+                return "HIPROC";
+                break;
+            default:
+                fprintf(stderr, "Erreur de lecture info");
+                exit(2);
+                break;
+    }
+    return NULL;
+}
+
+
+char *type(char vis){
+    switch(vis){
+        case 0:
+            return "NOTYPE";
+            break;
+        case 1:
+            return "OBJECT";
+            break;
+        case 2:
+            return "FUNC";
+            break;
+        case 3:
+            return "SECTION";
+            break;
+        case 4:
+            return "FILE";
+            break;
+        case 13:
+            return "LOPROC";
+            break;
+        case 15:
+            return "HIPROC";
+            break;
+        default:
+            fprintf(stderr, "Erreur de lecture info");
+            exit(2);
+            break;
+    }
+    return NULL;
+
+}
+
+
+char *calculNdx(uint16_t ndx, int taille ){
+    if(ndx > 0 && ndx <= taille){
+            char *res = malloc(sizeof(char)*12);
+            sprintf(res, "%d", ndx);
+            return res;
+        }else{
+            switch(ndx){
+                case 0:
+                    return "UND";
+                    break;
+                case 0xff00:
+                    return "LOPROC";
+                    break;
+                case 0xff1f:
+                    return "HIPROC";
+                    break;
+                case 0xfff1:
+                    return "ABS";
+                    break;
+                case 0xfff2:
+                    return "COMMON";
+                    break;
+                case 0xffff:
+                    return "HIRESERVE";
+                    break;
+                default:
+                    fprintf(stderr, "Erreur de lecture ndx");
+                    exit(2);
+            }
+
+        }
+}
+
+
+//table[i].st_info >> 4
+
+//table[i].st_info & 0xf
+
+void afficherSymbol(ELF_Symbol *table, int taille){
+    fprintf(stdout, "Num :\tValue \tSize\tType\tBind \tVis \t Ndx\t Name\n");
+    for(int i =0; i < taille; i++){
+        fprintf(stdout, "%d:\t%.8x %d\t%s\t%s\tDEFAULT\t %s\t %.8x\t\n", i, table[i].st_value, table[i].st_size, type(table[i].st_info & 0xf), binding(table[i].st_info >> 4), calculNdx(table[i].st_shndx, taille),table[i].st_name);
+    }      
+}
+
+
+void afficherMagic(ELF_Header *Header, int taille){
+    for(int i =0; i < taille; i++){
+        printf("%.2hx ", Header->e_ident[i]);
+    }
+    printf("\n");
+}
+
+
 void afficher_sect(Elf32_Section_Header *tab, uint16_t nb){
 
 

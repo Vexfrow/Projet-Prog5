@@ -50,3 +50,8 @@ Questions:
     - Aucune informations sur le Flag I ? On se limite au 4 flags de la doc ou plus ?
     - Ou se trouve sh_entsize? Doit-on le preciser dans notre sortie, car il n'apparait aps dans readElf?
     - Comment savoir en quelle machine on est ? ARM ? 
+
+
+Jour 2: 
+
+    Problemes dans l'ordre de lecture. Attention au 64 bits et 32 bits

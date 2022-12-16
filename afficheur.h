@@ -4,6 +4,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <elf.h>
+#include "lecteur_fichier.h"
+
+void afficherMagic(ELF_Header *Header, int taille);
+
+void afficherSymbol(ELF_Symbol *table, int taille);
 
 void afficher_sect(Elf32_Section_Header *tab, uint16_t nb); // il sera dégagé plus tard
 
