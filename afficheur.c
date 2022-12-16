@@ -103,8 +103,60 @@ void afficher_sh_entsize(unsigned int entsize){
 }
 
 void afficher_sh_flags(unsigned int flags){
-
-    printf("%x", flags);
+    unsigned int res = (flags & SHF_WRITE);
+    if (res == SHF_WRITE){
+        printf("W");
+    }
+    res = (flags & SHF_ALLOC );
+    if (res == SHF_ALLOC){
+        printf("A");
+    }
+    res = (flags & SHF_EXECINSTR );
+    if (res == SHF_EXECINSTR){
+        printf("X");
+    }
+    res = (flags & SHF_MERGE );
+    if (res == SHF_MERGE){
+        printf("M");
+    }
+    res = (flags & SHF_STRINGS );
+    if (res == SHF_STRINGS){
+        printf("S");
+    }
+    res = (flags & SHF_INFO_LINK );
+    if (res == SHF_INFO_LINK){
+        printf("I");
+    }
+    res = (flags & SHF_LINK_ORDER );
+    if (res == SHF_LINK_ORDER){
+        printf("L");
+    }
+    res = (flags & SHF_OS_NONCONFORMING );
+    if (res == SHF_OS_NONCONFORMING){
+        printf("O");
+    }
+    res = (flags & SHF_GROUP );
+    if (res == SHF_GROUP){
+        printf("G");
+    }
+    res = (flags & SHF_TLS );
+    if (res == SHF_TLS){
+        printf("T");
+    }
+    res = (flags & SHF_COMPRESSED );
+    if (res == SHF_COMPRESSED){
+        printf("C");
+    }
+    res = (flags & SHF_EXCLUDE );
+    if (res == SHF_EXCLUDE){
+        printf("E");
+    }
+    if (flags == SHF_MASKOS ){
+        printf("o");
+    }
+    if (flags == SHF_MASKPROC ){
+        printf("p");
+    }
     printf("\t");
 
 }

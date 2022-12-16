@@ -3,6 +3,7 @@
 #include "lecteur_fichier.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <elf.h>
 
 void afficher_sect(Elf32_Section_Header *tab, uint16_t nb); // il sera dégagé plus tard
 
