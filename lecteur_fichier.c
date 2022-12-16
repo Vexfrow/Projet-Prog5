@@ -177,10 +177,6 @@ void afficherHeader(ELF_Header *Header){
 
 
 
-
-
-
-
 ELF_Header *init(FILE *fichier){
     //Ajouter les Macros pour N_IDENT 16
     ELF_Header *elf = malloc(sizeof(ELF_Header));
@@ -256,11 +252,15 @@ ELF_Symbol *remplirSymbol(FILE *fichier, ELF_Symbol *table, int taille){
 
 
 ELF_Symbol *tableSymbol(FILE *fichier, Elf32_Section_Header *sectionHead, int tailleSectionTable){
+    if(sectionHead == NULL){
+        fprintf(stderr, "Pas de table des sections(tableSymbol)");
+        exit(3);
+    }
     int i = 0;
     while( i < tailleSectionTable && sectionHead[i].sh_type != SHT_SYMTAB){
         i++;
     }
-    int taille = sectionHead[i].sh_size / 16;
+    int taille = tailleTableSymbol(sectionHead, tailleSectionTable);
     ELF_Symbol *table = malloc(sizeof(ELF_Symbol)*taille);
     if(table == NULL){
         fprintf(stderr, "Pas assez de place mémoire");
@@ -271,3 +271,14 @@ ELF_Symbol *tableSymbol(FILE *fichier, Elf32_Section_Header *sectionHead, int ta
     return table;
 }
 
+int tailleTableSymbol(Elf32_Section_Header *sectionHead, int tailleSectionTable){
+    if(sectionHead == NULL){
+        fprintf(stderr, "Pas de table des sections (tailleTableSymbol)");
+        exit(3);
+    }
+    int i = 0;
+    while( i < tailleSectionTable && sectionHead[i].sh_type != SHT_SYMTAB){
+        i++;
+    }
+    return sectionHead[i].sh_size / 16;
+}

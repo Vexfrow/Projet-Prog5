@@ -120,5 +120,6 @@ ELF_Symbol *tableSymbol(FILE *fichier, Elf32_Section_Header *sectionHead, int ta
 
 ELF_Symbol *remplirSymbol(FILE *fichier, ELF_Symbol *table, int taille);
 
+int tailleTableSymbol(Elf32_Section_Header *sectionHead, int tailleSectionTable);
 
 #endif
