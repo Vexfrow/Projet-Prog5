@@ -274,3 +274,8 @@ int tailleTableSymbol(Elf32_Section_Header *sectionHead, int tailleSectionTable)
     }
     return sectionHead[i].sh_size / 16;
 }
+
+
+ELF_Rel *tableRelocation(FILE *fichier, Elf32_Section_Header *sectionHead){
+    return NULL;
+}

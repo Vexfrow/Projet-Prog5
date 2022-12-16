@@ -47,6 +47,12 @@ typedef struct {
     uint16_t st_shndx;
 } ELF_Symbol;
 
+
+typedef struct {
+    unsigned int r_offset;
+    unsigned int r_info;
+} ELF_Rel;
+
 // Affichage de l'Header: ------------------------
 
 #define ELFCLASSNONE 0
