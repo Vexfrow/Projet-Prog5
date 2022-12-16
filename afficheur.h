@@ -3,7 +3,7 @@
 #include "lecteur_fichier.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "lecteur_fichier.h"
+#include <elf.h>
 
 void afficherMagic(ELF_Header *Header, int taille);
 
@@ -32,5 +32,36 @@ void afficher_sh_entsize(unsigned int entsize);
 void afficher_sh_flags(unsigned int flags);
 
 void afficher_section(Elf32_Section_Header *tab, uint16_t nb);
+
+
+
+
+// Affichage de l'Header: ------------------------
+
+//Permet de récupèrer la classe de l'ELF
+char *getClass(unsigned char c);
+
+//Permet de récuperer la manière dont sont encodées les données
+char *getDataEncoding(unsigned char c);
+
+//Permet de récuperer la version du fichier
+char *getVersion(unsigned char c);
+
+//TODO MAXIME
+//Permet de récuperer la manière dont sont encodées les données
+char *getOSABI(unsigned char c);
+
+//Permet de récuperer le type
+char *getType(uint16_t c);
+
+
+#define EM_MIPS_RS4_BE 10
+#define RESERVED 11 ... 16
+//Permet de récuperer la machine
+char *getMachine(uint16_t c);
+
+// Affiche le header (similaire à 'arm-none-eabi-readelf -a {file_name}.o')
+void afficher_header(ELF_Header *Header);
+
 
 #endif
