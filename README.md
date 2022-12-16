@@ -54,4 +54,4 @@ Questions:
 
 Jour 2: 
 
-    Problemes dans l'ordre de lecture.
+    Problemes dans l'ordre de lecture. Attention au 64 bits et 32 bits

@@ -9,9 +9,10 @@ int main (int argc, char *argv[]){
     init_section_header(fichier, header->e_shnum, header->e_shoff, Section_header_tab);
 
     ELF_Symbol *sym=tableSymbol(fichier, Section_header_tab, header->e_shnum);
-    fprintf(stderr, "table taille %d\n", tailleTableSymbol(Section_header_tab, header->e_shnum));
-    afficherSymbol(sym, tailleTableSymbol(Section_header_tab, header->e_shnum));
     
+    
+    afficher_section(Section_header_tab, header->e_shnum);
+    afficherSymbol(sym, tailleTableSymbol(Section_header_tab, header->e_shnum));
     return 0;
 
 
