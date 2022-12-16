@@ -111,12 +111,14 @@ void afficher_sh_flags(unsigned int flags){
 
 void afficher_section(Elf32_Section_Header *tab, uint16_t nb){
 
-    printf("[Nr] \t Name \t    Type \t Addr \t Off \t Size \t ES \t Flg \t Lk \t Inf \t Al \n");
+    printf("\n");
+    printf("Section Headers:\n");
+    printf("  [Nr] \t Name \t    Type \t Addr \t Off \t Size \t ES \t Flg \t Lk \t Inf \t Al \n");
     int i = 0;
 
     while(i<nb){
         
-        printf("[%d]", i);
+        printf("  [%d]", i);
         printf("\t");
         afficher_sh_name(tab[i].sh_name);
         afficher_sh_type(tab[i].sh_type);

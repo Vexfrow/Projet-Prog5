@@ -76,25 +76,25 @@ char *getType(uint16_t c){
     char *type;
     switch (c) {
         case ET_NONE: 
-            type = "No file type";
+            type = "NONE (No file type)";
             break;
         case ET_REL: 
-            type = "Relocatable file";
+            type = "REL (Relocatable file)";
             break;
         case ET_EXEC: 
-            type = "Executable file";
+            type = "EXEC (Executable file)";
             break;
         case ET_DYN: 
-            type = "Shared object file";
+            type = "DYN (Shared object file)";
             break;
         case ET_CORE: 
-            type = "Core file";
+            type = "CORE (Core file)";
             break;
         case ET_LOPROC: 
-            type = "Processor-specific";
+            type = "LOPROC (Processor-specific)";
             break;
         case ET_HIPROC: 
-            type = "Processor-specific";
+            type = "HIPROC (Processor-specific)";
             break;
         default:
             fprintf(stderr, "ERREUR: Valeur de type invalide: e_type = 0x%.4hx\n", c);
@@ -146,6 +146,7 @@ char *getMachine(uint16_t c){
     return machine;
 }
 
+
 void afficherHeader(ELF_Header *Header){
     printf("ELF Header :\n");
     printf("  Magic : ");
@@ -153,18 +154,25 @@ void afficherHeader(ELF_Header *Header){
         printf("%.2hx ", Header->e_ident[i]);
     }
     printf("\n");
-    printf("  Class : %s\n", getClass(Header->e_ident[EI_CLASS]));
-    printf("  Data : %s\n", getDataEncoding(Header->e_ident[EI_DATA]));
-    printf("  Version : %s\n",getVersion(Header->e_ident[EI_VERSION]));
-    printf("  OS/ABI : %s\n", getOSABI(Header->e_ident[EI_OSABI]));
-    printf("  ABI Version : %d\n", Header->e_ident[EI_ABIVERSION]);
-    printf("  Type : %s\n", getType(Header->e_type));
-    printf("  Machine : %s\n", getMachine(Header->e_machine));
-    printf("  Version : 0x%hx\n", Header->e_version);
-    printf("  Entry point address : 0x%hx\n", Header->e_entry);
-    printf("  Start of program headers : %d (bytes into file)\n", Header->e_phoff);
-    printf("  Start of system headers : %d (bytes into file)\n", Header->e_shoff);
-    printf( " Flags: 0x%hx\n", Header->e_flags);
+    printf("  Class:                             %s\n", getClass(Header->e_ident[EI_CLASS]));
+    printf("  Data:                              %s\n", getDataEncoding(Header->e_ident[EI_DATA]));
+    printf("  Version:                           %s\n",getVersion(Header->e_ident[EI_VERSION]));
+    printf("  OS/ABI:                            %s\n", getOSABI(Header->e_ident[EI_OSABI]));
+    printf("  ABI Version:                       %d\n", Header->e_ident[EI_ABIVERSION]);
+    printf("  Type:                              %s\n", getType(Header->e_type));
+    printf("  Machine:                           %s\n", getMachine(Header->e_machine));
+    printf("  Version:                           0x%hx\n", Header->e_version);
+    printf("  Entry point address:               0x%hx\n", Header->e_entry);
+    printf("  Start of program headers:          %d (bytes into file)\n", Header->e_phoff);
+    printf("  Start of system headers:           %d (bytes into file)\n", Header->e_shoff);
+    printf("  Flags:                             0x%x\n", Header->e_flags);
+    printf("  Size of headers:                   %d (bytes)\n", Header->e_ehsize);
+    printf("  Size of program headers:           %d (bytes)\n", Header->e_phentsize);
+    printf("  Number of program headers:         %d\n", Header->e_phnum);
+    printf("  Size of section headers:           %d (bytes)\n", Header->e_shentsize);
+    printf("  Number of section headers:         %d\n", Header->e_shnum);
+    printf("  Section header string table index: %d\n", Header->e_shstrndx);
+    printf("\n");
 }
 
 
