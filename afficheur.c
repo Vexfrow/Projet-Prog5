@@ -161,6 +161,9 @@ void afficher_sh_type(unsigned int type){
         case 2147483647 : printf("SHT_HIPROC"); break;
         case 2147483648 : printf("SHT_LOUSER"); break;
         case 4294967295 : printf("SHT_HIUSER"); break;
+        case 1879048195 : printf("SHT_ARM_ATTR"); break;
+        case 1879048194 : printf("SHT_ARM_PREE"); break;
+        case 1879048193 : printf("SHT_ARM_EXIDX"); break;
         default : printf("   ?  \t ");
     }
     printf("\t");
@@ -168,50 +171,44 @@ void afficher_sh_type(unsigned int type){
 
 void afficher_sh_addr(unsigned int addr){
 
-    printf("%x", addr);
-    printf("\t");
+    printf("%x\t", addr);
 
 }
 
 void afficher_sh_offset(unsigned int offset){
 
-    printf("%04x", offset);
-    printf("\t");
+    printf("%04x\t", offset);
 
 }
 
 void afficher_sh_size(unsigned int size){
 
-    printf("%04x", size);
-    printf("\t");
+    printf("%04x\t", size);
 
 }
 
 void afficher_sh_link(unsigned int link){
 
-    printf("%x", link);
-    printf("\t");
+    printf("%x\t", link);
 
 }
 
 void afficher_sh_info(unsigned int info){
 
-    printf("%x", info);
-    printf("\t");
+    printf("%x\t", info);
 
 }
 
 void afficher_sh_addralign(unsigned int addralign){
 
-    printf("%x", addralign);
-    printf("\t");
+    printf("%x\t", addralign);
+
 
 }
 
 void afficher_sh_entsize(unsigned int entsize){
 
-    printf("%x", entsize);
-    printf("\t");
+    printf("%x\t", entsize);
 
 }
 
@@ -281,8 +278,7 @@ void afficher_section(Elf32_Section_Header *tab, uint16_t nb){
 
     while(i<nb){
         
-        printf("[%d]", i);
-        printf("\t");
+        printf("[%d]\t", i);
         afficher_sh_name(tab[i].sh_name);
         afficher_sh_type(tab[i].sh_type);
         afficher_sh_addr(tab[i].sh_addr);
