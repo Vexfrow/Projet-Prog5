@@ -10,7 +10,7 @@ int main (int argc, char *argv[]){
 
     ELF_Symbol *sym=tableSymbol(fichier, Section_header_tab, header->e_shnum);
     
-    
+    afficher_header(header);
     afficher_section(Section_header_tab, header->e_shnum);
     afficherSymbol(sym, tailleTableSymbol(Section_header_tab, header->e_shnum));
     return 0;
