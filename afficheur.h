@@ -3,6 +3,7 @@
 #include "lecteur_fichier.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <elf.h>
 #include "lecteur_fichier.h"
 
 void afficherMagic(ELF_Header *Header, int taille);
