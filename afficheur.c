@@ -113,30 +113,30 @@ void afficherMagic(ELF_Header *Header, int taille){
 }
 
 
-void afficher_sect(Elf32_Section_Header *tab, uint16_t nb){
+// void afficher_sect(Elf32_Section_Header *tab, uint16_t nb){
 
 
-    int i = 0;
-    while(i<nb){
-        afficher_sh_name(tab[i].sh_name);
-        printf("sh_name:%x  ",tab[i].sh_name);
-        printf("type:%x  ",tab[i].sh_type);
-        printf("sh_flags:%x  ",tab[i].sh_flags);
-        printf("sh_addr:%x  ",tab[i].sh_addr);
-        printf("sh_offset:%x  ",tab[i].sh_offset);
-        printf("sh_size:%x  ",tab[i].sh_size);
-        printf("sh_link:%x  ",tab[i].sh_link);
-        printf("sh_info:%x  ",tab[i].sh_info);
-        printf("sh_addralign:%x  ",tab[i].sh_addralign);
-        printf("sh_entsize:%x  ",tab[i].sh_entsize);
-        i++;
-        printf(" \n ");
-    }
-}
+//     int i = 0;
+//     while(i<nb){
+//         afficher_sh_name(tab[i].sh_name);
+//         printf("sh_name:%s  ",tab[i].sh_name);
+//         printf("type:%x  ",tab[i].sh_type);
+//         printf("sh_flags:%x  ",tab[i].sh_flags);
+//         printf("sh_addr:%x  ",tab[i].sh_addr);
+//         printf("sh_offset:%x  ",tab[i].sh_offset);
+//         printf("sh_size:%x  ",tab[i].sh_size);
+//         printf("sh_link:%x  ",tab[i].sh_link);
+//         printf("sh_info:%x  ",tab[i].sh_info);
+//         printf("sh_addralign:%x  ",tab[i].sh_addralign);
+//         printf("sh_entsize:%x  ",tab[i].sh_entsize);
+//         i++;
+//         printf(" \n ");
+//     }
+// }
 
-void afficher_sh_name(unsigned int name){
+void afficher_sh_name(char* name){
 
-    printf("%x", name);
+    printf("%s", name);
     printf("\t");
     
 }
@@ -271,7 +271,28 @@ void afficher_sh_flags(unsigned int flags){
 
 }
 
-void afficher_section(Elf32_Section_Header *tab, uint16_t nb){
+
+
+char* getName(FILE *fichier, unsigned int address){
+    char name[50];
+    fseek(fichier, address, SEEK_SET);
+    char c = fgetc(fichier);
+
+    int i = 0;
+    while(c != '\0'){
+        name[i] = c;
+        i++;
+        c = fgetc(fichier);
+    }
+    name[i] = '\0';
+    char* res = name;
+    return res;
+}
+
+
+
+
+void afficher_section(Elf32_Section_Header *tab, uint16_t nb, FILE *fichier){
 
     printf("Section Headers:\n");
     printf("  [Nr] \t Name \t    Type \t Addr \t Off \t Size \t ES \t Flg \t Lk \t Inf \t Al \n");
@@ -279,8 +300,8 @@ void afficher_section(Elf32_Section_Header *tab, uint16_t nb){
 
     while(i<nb){
         
-        printf("[%d]\t", i);
-        afficher_sh_name(tab[i].sh_name);
+        printf("  [%d]\t", i);
+        afficher_sh_name(getName(fichier, tab[i].sh_name));
         afficher_sh_type(tab[i].sh_type);
         afficher_sh_addr(tab[i].sh_addr);
         afficher_sh_offset(tab[i].sh_offset);
@@ -296,6 +317,8 @@ void afficher_section(Elf32_Section_Header *tab, uint16_t nb){
     }
 
 }
+
+
 
 
 //------------------------------------AFFICHAGE ELF HEADER---------------------------
@@ -328,10 +351,10 @@ char *getDataEncoding(unsigned char c){
             dataEncoding = "Invalid data encoding";
             break;
         case ELFDATA2LSB:
-            dataEncoding = "2's complement values, little endian";
+            dataEncoding = "2's complement, little endian";
             break;
         case ELFDATA2MSB:
-            dataEncoding = "2's complement values, big endian";
+            dataEncoding = "2's complement, big endian";
             break;
         default:
             fprintf(stderr, "ERREUR: Valeur de data encoding invalide: e_ident[EI_DATA] = 0x%.2hx", c);
@@ -361,7 +384,7 @@ char *getVersion(unsigned char c){
 
 //TODO MAXIME
 char *getOSABI(unsigned char c){
-    char *OSABI="UNIX - TODO";
+    char *OSABI="UNIX - System V";
     return OSABI;
 }
 
@@ -398,44 +421,44 @@ char *getType(uint16_t c){
 }
 
 char *getMachine(uint16_t c){
-    char *machine;
-    switch (c) {
-        case EM_NONE: 
-            machine = "No machine";
-            break;
-        case EM_M32: 
-            machine = "AT&T WE 32100";
-            break;
-        case EM_SPARC: 
-            machine = "SPARC";
-            break;
-        case EM_386: 
-            machine = "Intel Architecture";
-            break;
-        case EM_68K: 
-            machine = "Motorola 68000";
-            break;
-        case EM_88K: 
-            machine = "Motorola 88000";
-            break;
-        case EM_860: 
-            machine = "Intel 80860";
-            break;
-        case EM_MIPS: 
-            machine = "MIPS RS3000 Big-Endian";
-            break;
-        case EM_MIPS_RS4_BE: 
-            machine = "MIPS RS4000 Big-Endian";
-            break;
-        case RESERVED: 
-            machine = "Reserved for future use";
-            break;
-        default:
-            machine = "Machine non répertoriée";
-            //fprintf(stderr, "ERREUR: Valeur de machine invalide: e_type = 0x%.4hx\n", c);
-            //exit(1);
-            break;
-    }
+    char *machine ="ARM";
+    // switch (c) {
+    //     case EM_NONE: 
+    //         machine = "No machine";
+    //         break;
+    //     case EM_M32: 
+    //         machine = "AT&T WE 32100";
+    //         break;
+    //     case EM_SPARC: 
+    //         machine = "SPARC";
+    //         break;
+    //     case EM_386: 
+    //         machine = "Intel Architecture";
+    //         break;
+    //     case EM_68K: 
+    //         machine = "Motorola 68000";
+    //         break;
+    //     case EM_88K: 
+    //         machine = "Motorola 88000";
+    //         break;
+    //     case EM_860: 
+    //         machine = "Intel 80860";
+    //         break;
+    //     case EM_MIPS: 
+    //         machine = "MIPS RS3000 Big-Endian";
+    //         break;
+    //     case EM_MIPS_RS4_BE: 
+    //         machine = "MIPS RS4000 Big-Endian";
+    //         break;
+    //     case RESERVED: 
+    //         machine = "Reserved for future use";
+    //         break;
+    //     default:
+    //         machine = "Machine non répertoriée";
+    //         //fprintf(stderr, "ERREUR: Valeur de machine invalide: e_type = 0x%.4hx\n", c);
+    //         //exit(1);
+    //         break;
+    // }
     return machine;
 }
 

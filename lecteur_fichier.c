@@ -36,37 +36,44 @@ ELF_Header *init(FILE *fichier){
 }
 
 
-void init_section_header(FILE *fichier, uint16_t nb, unsigned int adrStart, Elf32_Section_Header *tab){
+void init_section_header(FILE *fichier, uint16_t nb, unsigned int adrStart, Elf32_Section_Header *tab, unsigned int indexStringTable){
     int i = 0;
+    unsigned int adressStringTable;
     while ( i < nb){
         int j = 0;
-        while(j< 10){
-            fseek(fichier, adrStart +40*(i), SEEK_SET);
-            int val = lecture4octet(fichier);
-            tab[i].sh_name = val;
-            val = lecture4octet(fichier);
-            tab[i].sh_type = val;
-            val = lecture4octet(fichier);
-            tab[i].sh_flags = val;
-            val = lecture4octet(fichier);
-            tab[i].sh_addr = val;
-            val = lecture4octet(fichier);
-            tab[i].sh_offset = val;
-            val = lecture4octet(fichier);
-            tab[i].sh_size = val;
-            val = lecture4octet(fichier);
-            tab[i].sh_link = val;
-            val = lecture4octet(fichier);
-            tab[i].sh_info = val;
-            val = lecture4octet(fichier);
-            tab[i].sh_addralign = val;
-            val = lecture4octet(fichier);
-            tab[i].sh_entsize = val;
+        fseek(fichier, adrStart +40*(i), SEEK_SET);
+        int val = lecture4octet(fichier);
+        tab[i].sh_name = val;
+        val = lecture4octet(fichier);
+        tab[i].sh_type = val;
+        val = lecture4octet(fichier);
+        tab[i].sh_flags = val;
+        val = lecture4octet(fichier);
+        tab[i].sh_addr = val;
+        val = lecture4octet(fichier);
+        tab[i].sh_offset = val;
+        val = lecture4octet(fichier);
+        tab[i].sh_size = val;
+        val = lecture4octet(fichier);
+        tab[i].sh_link = val;
+        val = lecture4octet(fichier);
+        tab[i].sh_info = val;
+        val = lecture4octet(fichier);
+        tab[i].sh_addralign = val;
+        val = lecture4octet(fichier);
+        tab[i].sh_entsize = val;
 
-            j++; 
+        if(i == indexStringTable){
+            adressStringTable = tab[i].sh_addr+tab[i].sh_offset;
         }
-        i++;
+        i++;     
     }
+    
+    
+    for(i = 0; i < nb; i++){
+        tab[i].sh_name = adressStringTable+tab[i].sh_name;
+    }
+
 }
 
 
