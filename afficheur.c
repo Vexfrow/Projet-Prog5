@@ -1,4 +1,5 @@
 #include "afficheur.h"
+#include "string.h"
 
 char *binding(char bind){
     switch(bind){
@@ -97,11 +98,31 @@ char *calculNdx(uint16_t ndx, int taille ){
 
 //table[i].st_info & 0xf
 
-void afficherSymbol(ELF_Symbol *table, int taille){
+void afficherSymbol(ELF_Symbol *table, int taille, FILE *fichier, Elf32_Section_Header *tab){
     fprintf(stdout, "Num :\tValue \tSize\tType\tBind \tVis \t Ndx\t Name\n");
+
+
+    //On récupère l'index dans le header section du SYM
+    int j = 0;
+    while(tab[j].sh_type != SHT_SYMTAB){
+        j++;
+    }
+
+    //On calcul l'adresse de l'endroit où est stocké la "symbol string table" grâce à l'index contenue dans "sh_link"
+    int adressSymbolStringTable = tab[tab[j].sh_link].sh_addr + tab[tab[j].sh_link].sh_offset;
+
     for(int i =0; i < taille; i++){
-        fprintf(stdout, "%d:\t%.8x %d\t%s\t%s\tDEFAULT\t %s\t %.8x\t\n", i, table[i].st_value, table[i].st_size, type(table[i].st_info & 0xf), binding(table[i].st_info >> 4), calculNdx(table[i].st_shndx, taille),table[i].st_name);
+        char* res = calculNdx(table[i].st_shndx, taille);
+
+        if((strcmp(type(table[i].st_info & 0xf), "SECTION") )) {
+            fprintf(stdout, "%d:\t%.8x %d\t%s\t%s\tDEFAULT\t %s\t %s\t\n", i, table[i].st_value, table[i].st_size, type(table[i].st_info & 0xf), binding(table[i].st_info >> 4), res, getName(fichier,adressSymbolStringTable + table[i].st_name));
+        }else{
+            fprintf(stdout, "%d:\t%.8x %d\t%s\t%s\tDEFAULT\t %s\t %s\t\n", i, table[i].st_value, table[i].st_size, type(table[i].st_info & 0xf), binding(table[i].st_info >> 4), res, getName(fichier, tab[atoi(res)].sh_name + table[i].st_name));
+
+        }
+        
     }      
+    
 }
 
 
@@ -113,26 +134,6 @@ void afficherMagic(ELF_Header *Header, int taille){
 }
 
 
-// void afficher_sect(Elf32_Section_Header *tab, uint16_t nb){
-
-
-//     int i = 0;
-//     while(i<nb){
-//         afficher_sh_name(tab[i].sh_name);
-//         printf("sh_name:%s  ",tab[i].sh_name);
-//         printf("type:%x  ",tab[i].sh_type);
-//         printf("sh_flags:%x  ",tab[i].sh_flags);
-//         printf("sh_addr:%x  ",tab[i].sh_addr);
-//         printf("sh_offset:%x  ",tab[i].sh_offset);
-//         printf("sh_size:%x  ",tab[i].sh_size);
-//         printf("sh_link:%x  ",tab[i].sh_link);
-//         printf("sh_info:%x  ",tab[i].sh_info);
-//         printf("sh_addralign:%x  ",tab[i].sh_addralign);
-//         printf("sh_entsize:%x  ",tab[i].sh_entsize);
-//         i++;
-//         printf(" \n ");
-//     }
-// }
 
 void afficher_sh_name(char* name){
 
@@ -315,7 +316,7 @@ void afficher_section(Elf32_Section_Header *tab, uint16_t nb, FILE *fichier){
         i++;
         printf("\n");
     }
-
+    printf("\n\n");
 }
 
 
@@ -480,7 +481,7 @@ void afficher_header(ELF_Header *Header){
     printf("  Version:                           0x%hx\n", Header->e_version);
     printf("  Entry point address:               0x%hx\n", Header->e_entry);
     printf("  Start of program headers:          %d (bytes into file)\n", Header->e_phoff);
-    printf("  Start of system headers:           %d (bytes into file)\n", Header->e_shoff);
+    printf("  Start of section headers:          %d (bytes into file)\n", Header->e_shoff);
     printf("  Flags:                             0x%x\n", Header->e_flags);
     printf("  Size of headers:                   %d (bytes)\n", Header->e_ehsize);
     printf("  Size of program headers:           %d (bytes)\n", Header->e_phentsize);

@@ -111,6 +111,7 @@ ELF_Symbol *tableSymbol(FILE *fichier, Elf32_Section_Header *sectionHead, int ta
     return table;
 }
 
+
 int tailleTableSymbol(Elf32_Section_Header *sectionHead, int tailleSectionTable){
     if(sectionHead == NULL){
         fprintf(stderr, "Pas de table des sections (tailleTableSymbol)");

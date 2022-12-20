@@ -7,7 +7,7 @@
 
 void afficherMagic(ELF_Header *Header, int taille);
 
-void afficherSymbol(ELF_Symbol *table, int taille);
+void afficherSymbol(ELF_Symbol *table, int taille, FILE *fichier, Elf32_Section_Header *tab);
 
 void afficher_sect(Elf32_Section_Header *tab, uint16_t nb); // il sera dégagé plus tard
 
@@ -33,7 +33,7 @@ void afficher_sh_flags(unsigned int flags);
 
 void afficher_section(Elf32_Section_Header *tab, uint16_t nb, FILE *fichier);
 
-
+char* getName(FILE *fichier, unsigned int address);
 
 
 // Affichage de l'Header: ------------------------

@@ -11,7 +11,7 @@ int main (int argc, char *argv[]){
     
     afficher_header(header);
     afficher_section(Section_header_tab, header->e_shnum, fichier);
-    afficherSymbol(sym, tailleTableSymbol(Section_header_tab, header->e_shnum));
+    afficherSymbol(sym, tailleTableSymbol(Section_header_tab, header->e_shnum), fichier, Section_header_tab);
     return 0;
 
 
