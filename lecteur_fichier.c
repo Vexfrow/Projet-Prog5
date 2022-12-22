@@ -11,13 +11,12 @@ void remplirMagic(FILE *fichier, ELF_Header *Header, int taille){
 }
 
 ELF_Header *init(FILE *fichier){
-    //Ajouter les Macros pour N_IDENT 16
     ELF_Header *elf = malloc(sizeof(ELF_Header));
     if(elf == NULL){
         fprintf(stderr, "ERREUR: Pas assez d'espace mémoire");
         exit(1);
     }
-    remplirMagic(fichier, elf, 16);
+    remplirMagic(fichier, elf, EI_NIDENT);
     elf->e_type = lecture2octet(fichier);
     elf->e_machine = lecture2octet(fichier);
     elf->e_version = lecture4octet(fichier);

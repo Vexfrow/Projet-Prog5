@@ -9,8 +9,6 @@ void afficherMagic(ELF_Header *Header, int taille);
 
 void afficherSymbol(ELF_Symbol *table, int taille, FILE *fichier, Elf32_Section_Header *tab);
 
-void afficher_sect(Elf32_Section_Header *tab, uint16_t nb); // il sera dégagé plus tard
-
 void afficher_sh_name(char* name);
 
 void afficher_sh_type(unsigned int type);

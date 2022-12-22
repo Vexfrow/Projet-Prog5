@@ -126,14 +126,6 @@ void afficherSymbol(ELF_Symbol *table, int taille, FILE *fichier, Elf32_Section_
 }
 
 
-void afficherMagic(ELF_Header *Header, int taille){
-    for(int i =0; i < taille; i++){
-        printf("%.2hx ", Header->e_ident[i]);
-    }
-    printf("\n");
-}
-
-
 
 void afficher_sh_name(char* name){
 
@@ -462,6 +454,16 @@ char *getMachine(uint16_t c){
     // }
     return machine;
 }
+
+
+
+void afficherMagic(ELF_Header *Header, int taille){
+    for(int i =0; i < taille; i++){
+        printf("%.2hx ", Header->e_ident[i]);
+    }
+    printf("\n");
+}
+
 
 
 void afficher_header(ELF_Header *Header){
