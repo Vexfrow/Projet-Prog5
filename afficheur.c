@@ -372,7 +372,7 @@ char *getVersion(unsigned char c){
             version="0 (Invalid Version)";
             break;
         case EV_CURRENT:
-            version="1 (Current Version)";
+            version="1 (current)";
             break;
         default:
             fprintf(stderr, "ERREUR: Valeur de version invalide: e_ident[EI_VERSION] = 0x%.2hx", c);
@@ -465,8 +465,8 @@ char *getMachine(uint16_t c){
 
 
 void afficher_header(ELF_Header *Header){
-    printf("ELF Header :\n");
-    printf("  Magic : ");
+    printf("ELF Header:\n");
+    printf("  Magic:   ");
     for(int i =0; i < 16; i++){
         printf("%.2hx ", Header->e_ident[i]);
     }
@@ -482,12 +482,11 @@ void afficher_header(ELF_Header *Header){
     printf("  Entry point address:               0x%hx\n", Header->e_entry);
     printf("  Start of program headers:          %d (bytes into file)\n", Header->e_phoff);
     printf("  Start of section headers:          %d (bytes into file)\n", Header->e_shoff);
-    printf("  Flags:                             0x%x\n", Header->e_flags);
-    printf("  Size of headers:                   %d (bytes)\n", Header->e_ehsize);
+    printf("  Flags:                             0x%x, Version5 EABI\n", Header->e_flags);
+    printf("  Size of this header:               %d (bytes)\n", Header->e_ehsize);
     printf("  Size of program headers:           %d (bytes)\n", Header->e_phentsize);
     printf("  Number of program headers:         %d\n", Header->e_phnum);
     printf("  Size of section headers:           %d (bytes)\n", Header->e_shentsize);
     printf("  Number of section headers:         %d\n", Header->e_shnum);
     printf("  Section header string table index: %d\n", Header->e_shstrndx);
-    printf("\n");
 }
