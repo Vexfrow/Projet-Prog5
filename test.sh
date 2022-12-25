@@ -16,28 +16,21 @@ testHeader(){
 }
 
 
-
+#Revoir maniere de faire pour comparer ligne par ligne
 testSectionHeader(){
-    sectionHeaderA=`arm-none-eabi-readelf -S $1 | head -n -5 | tail -n +5` #On récupère juste le tableau
-    sectionHeaderB=`./main -sh $1 | tail -n +3`
-    for ((i=0;i<=10;i++));
-    do
-        echo "${sectionHeaderA}" > resultatAttendu
-        echo "${sectionHeaderB}" > resultatObtenu
-
-        echo `cut -f ${i+1} resultatAttendu` > resultatAttendu
-        echo `cut -f ${i+1} resultatObtenu` > resultatObtenu
-
-        cat resultatAttendu
-
-        #if diff resultatObtenu resultatAttendu
-        #then    
-         #   echo "Test header section réussie pour $1"
-        #else
-          #  echo "Test header raté pour $1"
-         #   exit
-        #fi
-    done
+    echo `arm-none-eabi-readelf -S $1 | head -n -5 | tail -n +5` > resultatAttendu    #On récupère juste le tableau
+    echo `./main -sh $1 | tail -n +3 | sed -r 's/SHT_NULL/NULL/g' | sed -r 's/SHT_NULL/NULL/g' | sed -r 's/SHT_PROGBITS/PROGBITS/g' | sed -r 's/SHT_NOBITS/NOBITS/g' | sed -r 's/SHT_ARM_ATTR/ARM_ATTRIBUTES/g' | sed -r 's/SHT_SYMTAB/SYMTAB/g' | sed -r 's/SHT_STRTAB/STRTAB/g' | sed -r 's/SHT_REL/REL/g'`> resultatObtenu
+    echo `grep -o [a-zA-Z0-9.] resultatAttendu` > resultatAttendu
+    echo `grep -o [a-zA-Z0-9.] resultatObtenu` > resultatObtenu
+  
+    if diff resultatObtenu resultatAttendu
+    then    
+        echo "Test header section réussie pour $1"
+    else
+        echo "Test header section raté pour $1"
+        exit
+    fi
+ 
 }
 
 
@@ -48,7 +41,7 @@ testSectionHeader(){
 make
 for file in ${arrayFile[@]}
 do
-    testHeader $file
+    #testHeader $file
     testSectionHeader $file
 done
 

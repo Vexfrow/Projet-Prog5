@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#define MESSAGE_OPTION "Le programme fonctionne de la manière suivante :\n ./main [option] fichier\n\nOption disponible (Une seule option lors du lancement de la commande) :\n -a (afficher tout - par defaut),\n -h (afficher que le header),\n -sh (afficher que la section header),\n -st (afficher que la table)\n -help (afficher cette aide)\n\n"
+#define MESSAGE_OPTION "Le programme fonctionne de la manière suivante :\n ./main [option] fichier\n\nOption disponible (Une seule option lors du lancement de la commande) :\n -a (tout afficher - par defaut),\n -h (afficher que le header),\n -sh (afficher que la section header),\n -st (afficher que la table)\n -help (afficher cette aide)\n\n"
 
 
 void gererOption(char *c,FILE* fichier){
@@ -70,7 +70,7 @@ int main (int argc, char *argv[]){
     }else if(argc == 2){
         FILE *fichier = fopen(argv[1], "r");
         if(fichier == NULL){
-            printf("ERREUR : Le fichier passer en paramètre n'existe pas\n%s", MESSAGE_OPTION);
+            printf("ERREUR : Le fichier passé en paramètre n'existe pas\n%s", MESSAGE_OPTION);
             exit(2);
         }
         afficherAll(fichier);
@@ -78,7 +78,7 @@ int main (int argc, char *argv[]){
     }else if(argc == 3){
         FILE *fichier = fopen(argv[2], "r");
         if(fichier == NULL){
-            printf("ERREUR : Le fichier passer en paramètre n'existe pas\n%s", MESSAGE_OPTION);
+            printf("ERREUR : Le fichier passé en paramètre n'existe pas\n%s", MESSAGE_OPTION);
             exit(2);
         }
         gererOption(argv[1], fichier);

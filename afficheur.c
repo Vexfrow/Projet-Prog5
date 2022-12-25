@@ -129,7 +129,7 @@ void afficherSymbol(ELF_Symbol *table, int taille, FILE *fichier, Elf32_Section_
 
 void afficher_sh_name(char* name){
 
-    printf("%s", name);
+    printf("%20s", name);
     printf("\t");
     
 }
@@ -142,14 +142,14 @@ void afficher_sh_type(unsigned int type){
         case 1 : printf("SHT_PROGBITS"); break;
         case 2 : printf("SHT_SYMTAB"); break;
         case 3 : printf("SHT_STRTAB"); break;
-        case 4 : printf("SHT_RELA "); break;
+        case 4 : printf("SHT_RELA\t"); break;
         case 5 : printf("SHT_HASH"); break;
         case 6 : printf("SHT_DYNAMIC"); break;
-        case 7 : printf("SHT_NOBITS"); break;
-        case 8 : printf("SHT_REL\t"); break;
-        case 9 : printf("SHT_SHLIB"); break;
-        case 10 : printf("SHT_DYNSYM"); break;
-        case 11 : printf("SHT_NULL"); break;
+        case 7 : printf("SHT_NOTE"); break;
+        case 8 : printf("SHT_NOBITS"); break;
+        case 9 : printf("SHT_REL\t"); break;
+        case 10 : printf("SHT_SHLIB"); break;
+        case 11 : printf("SHT_DYNSYM"); break;
         case 1879048192 : printf("SHT_LOPROC"); break;
         case 2147483647 : printf("SHT_HIPROC"); break;
         case 2147483648 : printf("SHT_LOUSER"); break;
@@ -164,19 +164,19 @@ void afficher_sh_type(unsigned int type){
 
 void afficher_sh_addr(unsigned int addr){
 
-    printf("%x\t", addr);
+    printf("%08x\t", addr);
 
 }
 
 void afficher_sh_offset(unsigned int offset){
 
-    printf("%04x\t", offset);
+    printf("%06x\t", offset);
 
 }
 
 void afficher_sh_size(unsigned int size){
 
-    printf("%04x\t", size);
+    printf("%06x\t", size);
 
 }
 
@@ -201,7 +201,7 @@ void afficher_sh_addralign(unsigned int addralign){
 
 void afficher_sh_entsize(unsigned int entsize){
 
-    printf("%x\t", entsize);
+    printf("%02x\t", entsize);
 
 }
 
@@ -288,7 +288,7 @@ char* getName(FILE *fichier, unsigned int address){
 void afficher_section(Elf32_Section_Header *tab, uint16_t nb, FILE *fichier){
 
     printf("Section Headers:\n");
-    printf("  [Nr] \t Name \t    Type \t Addr \t Off \t Size \t ES \t Flg \t Lk \t Inf \t Al \n");
+    printf("  [Nr] \t          Name \t         Type \t         Addr \t        Off \t Size \t ES \t Flg \t Lk \t Inf \t Al \n");
     int i = 0;
 
     while(i<nb){
