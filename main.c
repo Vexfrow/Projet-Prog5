@@ -6,22 +6,7 @@
 #define MESSAGE_OPTION "Le programme fonctionne de la manière suivante :\n ./main [option] fichier\n\nOption disponible (Une seule option lors du lancement de la commande) :\n -a (tout afficher - par defaut),\n -h (afficher que le header),\n -sh (afficher que la section header),\n -st (afficher que la table)\n -help (afficher cette aide)\n\n"
 
 
-void gererOption(char *c,FILE* fichier){
 
-    if(!strcmp(c, "-a"))
-        afficherAll(fichier);
-    else if(!strcmp(c,"-h"))
-        afficherHeader(fichier);
-    else if(!strcmp(c,"-sh"))
-        afficherHeaderSection(fichier);
-    else if(!strcmp(c,"-st"))
-        afficherSymbolTable(fichier);
-    else if(!strcmp(c, "-help"))
-        printf(MESSAGE_OPTION);
-    else    
-        printf("ERREUR : Option non prise en compte\n%s", MESSAGE_OPTION);
-
-}
 
 void afficherHeader(FILE *fichier){
     ELF_Header *header = init(fichier);
@@ -59,6 +44,23 @@ void afficherAll(FILE *fichier){
     afficherSymbol(sym, tailleTableSymbol(Section_header_tab, header->e_shnum), fichier, Section_header_tab);
 }
 
+
+void gererOption(char *c,FILE* fichier){
+
+    if(!strcmp(c, "-a"))
+        afficherAll(fichier);
+    else if(!strcmp(c,"-h"))
+        afficherHeader(fichier);
+    else if(!strcmp(c,"-sh"))
+        afficherHeaderSection(fichier);
+    else if(!strcmp(c,"-st"))
+        afficherSymbolTable(fichier);
+    else if(!strcmp(c, "-help"))
+        printf(MESSAGE_OPTION);
+    else    
+        printf("ERREUR : Option non prise en compte\n%s", MESSAGE_OPTION);
+
+}
 
 
 

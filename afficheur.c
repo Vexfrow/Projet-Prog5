@@ -182,13 +182,13 @@ void afficher_sh_size(unsigned int size){
 
 void afficher_sh_link(unsigned int link){
 
-    printf("%x\t", link);
+    printf("%d\t", link);
 
 }
 
 void afficher_sh_info(unsigned int info){
 
-    printf("%x\t", info);
+    printf("%d\t", info);
 
 }
 
