@@ -62,3 +62,27 @@ Les sections sont contigües et il y en  a e_shnum.
 > Ou se trouve sh_entsize? Doit-on le preciser dans notre sortie, car il n'apparait aps dans readElf?
 
 > Comment savoir en quelle machine on est ? ARM ? 
+
+Questions: 
+    - Aucune informations sur le Flag I ? On se limite au 4 flags de la doc ou plus ?
+    - Ou se trouve sh_entsize? Doit-on le preciser dans notre sortie, car il n'apparait aps dans readElf?
+    - Comment savoir en quelle machine on est ? ARM ? 
+
+
+Jour 2: 
+
+    Problemes dans l'ordre de lecture. Attention au 64 bits et 32 bits
+
+
+
+
+
+NOTICE POUR LES TESTS :
+  - Mettre les fichiers de tests dans le dossier ./tests
+  - Lancement du shell en faisant : ./test.sh
+  - Le programme parcours tout les fichiers du repertoire ./tests et compare leur affichage avec notre programme, avec leur affichage par la commande arm-none-eabi-readelf
+  - Si il n'y a pas de difference : Affichage du message "['SECTION de l'elf'] OK pour 'fichier'"
+  - Sinon il affiche "['SECTION de l'elf'] ECHEC pour 'fichier'"
+  - Dans ce cas là il indique l'endroit où il y a une difference. ATTENTION : La manière pour comparer les affichages n'est pas "tres propre" (ie, j'ai récupéré les valeurs "utiles" des deux affichages, en supprimant tout la mise en page, et je les ai comparées), cela implique que le texte renvoyé n'est pas très lisible.
+  - Si il y a un probleme avec le script (erreur alors que non, ou inverse), n'hesiter pas à me faire part du problème 
+Thomas
