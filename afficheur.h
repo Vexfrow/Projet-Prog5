@@ -63,5 +63,8 @@ char *getMachine(uint16_t c);
 // Affiche le header (similaire à 'arm-none-eabi-readelf -h {file_name}.o')
 void afficher_header(ELF_Header *Header);
 
+void afficherRelocations(Elf32_Section_Header *Rel_section_tab ,ELF_Rel *ELF_tab, ELF_Symbol *sym, int nb_ELF, int nb_section, FILE *fichier);
+
+
 
 #endif

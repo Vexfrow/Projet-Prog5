@@ -53,6 +53,7 @@ typedef struct {
     unsigned int r_info;
 } ELF_Rel;
 
+
 // -----------------------------------------------
 
 //Permet de remplir le "Magic number"
@@ -62,6 +63,7 @@ ELF_Header *init (FILE *fichier);
 
 void init_section_header(FILE *fichier, uint16_t nb, unsigned int adrStart, Elf32_Section_Header *tab, unsigned int adrStartString);
 
+void init_relocationTab(Elf32_Section_Header *Rel_section_tab,  ELF_Rel *ELF_tab, int nb, FILE *fichier);
 
 ELF_Symbol *tableSymbol(FILE *fichier, Elf32_Section_Header *sectionHead, int tailleSectionTable);
 

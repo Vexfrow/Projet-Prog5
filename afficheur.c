@@ -522,3 +522,27 @@ void afficher_header(ELF_Header *Header){
     printf("  Number of section headers:         %d\n", Header->e_shnum);
     printf("  Section header string table index: %d\n", Header->e_shstrndx);
 }
+
+
+//-------------------------------------------------------------------------------------------------------
+
+void afficherRelocations(Elf32_Section_Header *Rel_section_tab ,ELF_Rel *ELF_tab, ELF_Symbol *sym, int nb_ELF, int nb_section, FILE *fichier){
+    int i =0;
+    int j =0;
+    int nb=0;
+    while(j<nb_section){
+        i=0;
+        printf("Relocation section '%s' at offset 0x%hx contains %d entries: \n", getName(fichier, Rel_section_tab[j].sh_name), Rel_section_tab[j].sh_offset,(Rel_section_tab[j].sh_size/8) );
+        printf("Offset \t Info \t Type \t \t Sym.Value \t Sym. Name\n");
+        while(i < (Rel_section_tab[j].sh_size/8)){
+            printf("%.8hx ",ELF_tab[nb].r_offset);
+            printf("%.8hx\t",ELF_tab[nb].r_info);
+
+            i++;
+            nb++;
+            printf("\n");
+        }
+        j++;
+        printf("\n");
+    }
+}

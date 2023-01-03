@@ -123,7 +123,12 @@ int tailleTableSymbol(Elf32_Section_Header *sectionHead, int tailleSectionTable)
     return sectionHead[i].sh_size / 16;
 }
 
-
-ELF_Rel *tableRelocation(FILE *fichier, Elf32_Section_Header *sectionHead){
-    return NULL;
+void init_relocationTab(Elf32_Section_Header *Rel_section_tab,  ELF_Rel *ELF_tab, int nb, FILE *fichier){
+    int i = 0;
+    fseek(fichier, (Rel_section_tab[i].sh_addr + Rel_section_tab[i].sh_offset)+i*8, SEEK_SET);
+    while(i<nb){
+        ELF_tab[i].r_offset = lecture4octet(fichier);
+        ELF_tab[i].r_info = lecture4octet(fichier);
+        i++;
+    }
 }
