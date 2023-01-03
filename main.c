@@ -19,7 +19,7 @@ void afficherHeaderSection(FILE *fichier){
     Elf32_Section_Header *Section_header_tab = malloc(sizeof(Elf32_Section_Header)*header->e_shnum);
     init_section_header(fichier, header->e_shnum, header->e_shoff, Section_header_tab, header->e_shstrndx);
     
-    afficher_section(Section_header_tab, header->e_shnum, fichier);
+    afficher_sectiontable(Section_header_tab, header->e_shnum, fichier);
 }
 
 
@@ -40,9 +40,16 @@ void afficherAll(FILE *fichier){
     ELF_Symbol *sym=tableSymbol(fichier, Section_header_tab, header->e_shnum);
     
     afficher_header(header);
-    afficher_section(Section_header_tab, header->e_shnum, fichier);
+    afficher_sectiontable(Section_header_tab, header->e_shnum, fichier);
     afficherSymbol(sym, tailleTableSymbol(Section_header_tab, header->e_shnum), fichier, Section_header_tab);
 }
+void afficher_contenu_section(FILE *fichier, int nb){
+    ELF_Header *header = init(fichier);
+    Elf32_Section_Header *Section_header_tab = malloc(sizeof(Elf32_Section_Header)*header->e_shnum);
+    init_section_header(fichier, header->e_shnum, header->e_shoff, Section_header_tab, header->e_shstrndx);
+
+    afficher_section(Section_header_tab, nb, fichier);
+} 
 
 
 void gererOption(char *c,FILE* fichier){
@@ -84,7 +91,14 @@ int main (int argc, char *argv[]){
             exit(2);
         }
         gererOption(argv[1], fichier);
-    }else{
+    }else if(argc == 4){
+        FILE *fichier = fopen(argv[3], "r");
+        if(fichier == NULL){
+            printf("ERREUR : Le fichier passé en paramètre n'existe pas\n%s", MESSAGE_OPTION);
+            exit(2);
+        }
+        afficher_contenu_section(fichier, atoi(argv[2]));
+    }else {
         printf("ERREUR : Il faut lancer un programme avec un fichier en paramètre\n%s", MESSAGE_OPTION);
         exit(1);
     }

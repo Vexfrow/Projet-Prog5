@@ -1,4 +1,5 @@
 #include "afficheur.h"
+#include "reader_binaire.h"
 #include "string.h"
 
 char *binding(char bind){
@@ -285,7 +286,7 @@ char* getName(FILE *fichier, unsigned int address){
 
 
 
-void afficher_section(Elf32_Section_Header *tab, uint16_t nb, FILE *fichier){
+void afficher_sectiontable(Elf32_Section_Header *tab, uint16_t nb, FILE *fichier){
 
     printf("Section Headers:\n");
     printf("  [Nr] \t          Name \t         Type \t         Addr \t        Off \t Size \t ES \t Flg \t Lk \t Inf \t Al \n");
@@ -311,6 +312,35 @@ void afficher_section(Elf32_Section_Header *tab, uint16_t nb, FILE *fichier){
     printf("\n\n");
 }
 
+
+
+void afficher_section(Elf32_Section_Header *tab , int nb ,FILE *fichier){
+    printf("Affichage de la section numero %d, de nom", nb);
+    char * name = getName(fichier, tab[nb].sh_name);
+    printf(" %s \n", name);
+
+    int size = tab[nb].sh_size;
+    if(!size){
+        printf("Il n'y a pas de data dans cette section ");
+    }else{
+        fseek(fichier,tab[nb].sh_addr + tab[nb].sh_offset, SEEK_SET);
+        int i = 0;
+        unsigned char octet =0;
+        while(i<size){
+            if( !(i%4) && i){
+                printf(" ");
+            }
+            if(!(i%16)){
+                
+                printf("\n 0x%.8hx ",i);
+            }
+            octet = lecture1octet(fichier);
+            printf("%.2hx",octet);
+            i++;
+        }
+        printf("\n");
+    }
+}
 
 
 

@@ -29,7 +29,9 @@ void afficher_sh_entsize(unsigned int entsize);
 
 void afficher_sh_flags(unsigned int flags);
 
-void afficher_section(Elf32_Section_Header *tab, uint16_t nb, FILE *fichier);
+void afficher_sectiontable(Elf32_Section_Header *tab, uint16_t nb, FILE *fichier);
+
+void afficher_section(Elf32_Section_Header *tab , int nb ,FILE *fichier);
 
 char* getName(FILE *fichier, unsigned int address);
 
@@ -58,7 +60,7 @@ char *getType(uint16_t c);
 //Permet de récuperer la machine
 char *getMachine(uint16_t c);
 
-// Affiche le header (similaire à 'arm-none-eabi-readelf -a {file_name}.o')
+// Affiche le header (similaire à 'arm-none-eabi-readelf -h {file_name}.o')
 void afficher_header(ELF_Header *Header);
 
 
