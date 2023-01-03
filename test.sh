@@ -1,10 +1,10 @@
 arrayFile=(./tests/*)
-
+nbSections=0
 
 
 testHeader(){
     arm-none-eabi-readelf -h $1 > resultatAttendu
-    ./main -h $1 > resultatObtenu
+    ./main -h $1 | head -n -1  > resultatObtenu
 
     if diff resultatObtenu resultatAttendu
     then    
@@ -16,10 +16,9 @@ testHeader(){
 }
 
 
-#Revoir maniere de faire pour comparer ligne par ligne
 testSectionHeader(){
     arm-none-eabi-readelf -S -W $1 | head -n -5 | tail -n +5 | sed -r 's/ //g' | sed -r 's/\t//g' > resultatAttendu   
-    ./main -sh $1 | tail -n +3 | sed -r 's/SHT_//g' | sed -r 's/ARM_ATTR/ARM_ATTRIBUTES/g' | sed -r 's/ //g' | sed -r 's/\t//g'> resultatObtenu
+    ./main -S $1 | tail -n +3 | sed -r 's/SHT_//g' | sed -r 's/ARM_ATTR/ARM_ATTRIBUTES/g' | sed -r 's/ //g' | sed -r 's/\t//g'> resultatObtenu
 
     i=1
     while read -r ligneA;
@@ -44,6 +43,7 @@ testSectionHeader(){
     if [[ `sed -n "$i"p resultatObtenu | wc -w` -eq 0 ]]
     then 
         echo "[SECTION HEADER] OK pour $1"
+        nbVar=$(($i-2))
     else
         echo "[SECTION HEADER] ECHEC pour $1 : Nombre de lignes différent"
         exit
@@ -52,7 +52,6 @@ testSectionHeader(){
 }
 
 
-#Revoir maniere de faire pour comparer ligne par ligne
 testSymbolTable(){
 
     arm-none-eabi-readelf -s -W $1 | tail -n +4 | sed -r 's/ //g' | sed -r 's/\t//g' > resultatAttendu   
@@ -90,13 +89,40 @@ testSymbolTable(){
 }
 
 
+testSectionUnique(){
+
+    for j in `seq 0 $nbVar`
+    do
+        arm-none-eabi-readelf -x $j $1 | cut -c 1-48 | tail -n +3 | sed -r 's/ //g' | sed -r 's/\t//g' > resultatAttendu   
+        ./main -x $j $1 | cut -c 1-48 | tail -n +3 | sed -r 's/ //g' | sed -r 's/\t//g'> resultatObtenu
+
+        if [[ `sed -n 1p resultatAttendu` == "NOTE:Thissectionhasrelocationsagainstit," ]]
+        then 
+            arm-none-eabi-readelf -x $j $1 | cut -c 1-48 | tail -n +4 | sed -r 's/ //g' | sed -r 's/\t//g' > resultatAttendu
+        fi
+
+        if diff resultatObtenu resultatAttendu
+        then    
+            echo "[SECTION UNIQUE - $j ] OK pour $1"
+        else
+            echo "[SECTION UNIQUE - $j ] ECHEC pour $1"
+            exit
+        fi
+    done
+ 
+}
+
+
 
 make
 for file in ${arrayFile[@]}
 do
     testHeader $file
     testSectionHeader $file
+    testSectionUnique $file
     testSymbolTable $file
+    echo "--------------------------------------------------------------------------------------"
+    
 done
 
 

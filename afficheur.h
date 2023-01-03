@@ -5,38 +5,33 @@
 #include <stdlib.h>
 #include <elf.h>
 
-void afficherMagic(ELF_Header *Header, int taille);
+
 
 void afficherSymbol(ELF_Symbol *table, int taille, FILE *fichier, Elf32_Section_Header *tab);
 
-void afficher_sh_name(char* name);
 
-void afficher_sh_type(unsigned int type);
+//Permet de récupèrer le type de la section
+char* getShType(unsigned int type);
 
-void afficher_sh_addr(unsigned int addr);
-
-void afficher_sh_offset(unsigned int offset);
-
-void afficher_sh_size(unsigned int size);
-
-void afficher_sh_link(unsigned int link);
-
-void afficher_sh_info(unsigned int info);
-
-void afficher_sh_addralign(unsigned int addralign);
-
-void afficher_sh_entsize(unsigned int entsize);
-
+//Permet d'afficher les flags
 void afficher_sh_flags(unsigned int flags);
 
-void afficher_sectiontable(Elf32_Section_Header *tab, uint16_t nb, FILE *fichier);
 
+//Permet d'afficher la table des sections 
+void afficher_section_table(Elf32_Section_Header *tab, uint16_t nb, FILE *fichier);
+
+
+//Permet d'afficher le contenue d'une fonction à partir de son idex dans la table des sections 
 void afficher_section(Elf32_Section_Header *tab , int nb ,FILE *fichier);
 
+
+//Permet de récupèrer un string à partir d'un fichier et de sa position dans ce dit fichier
 char* getName(FILE *fichier, unsigned int address);
 
 
 // Affichage de l'Header: ------------------------
+
+void afficherMagic(ELF_Header *Header, int taille);
 
 //Permet de récupèrer la classe de l'ELF
 char *getClass(unsigned char c);
