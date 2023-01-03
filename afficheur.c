@@ -99,7 +99,7 @@ char *calculNdx(uint16_t ndx, int taille ){
 
 //table[i].st_info & 0xf
 
-void afficherSymbol(ELF_Symbol *table, int taille, FILE *fichier, Elf32_Section_Header *tab){
+void afficherSymbol(ELF_Symbol *table, int taille, FILE *fichier, Elf32_Section_Header *tab, int tailleSectionHeader){
     fprintf(stdout, "Num :\tValue \tSize\tType\tBind \tVis \t Ndx\t Name\n");
 
 
@@ -113,7 +113,7 @@ void afficherSymbol(ELF_Symbol *table, int taille, FILE *fichier, Elf32_Section_
     int adressSymbolStringTable = tab[tab[j].sh_link].sh_addr + tab[tab[j].sh_link].sh_offset;
 
     for(int i =0; i < taille; i++){
-        char* res = calculNdx(table[i].st_shndx, taille);
+        char* res = calculNdx(table[i].st_shndx, tailleSectionHeader);
 
         if((strcmp(type(table[i].st_info & 0xf), "SECTION") )) {
             fprintf(stdout, "%d:\t%.8x %d\t%s\t%s\tDEFAULT\t %s\t %s\t\n", i, table[i].st_value, table[i].st_size, type(table[i].st_info & 0xf), binding(table[i].st_info >> 4), res, getName(fichier,adressSymbolStringTable + table[i].st_name));
@@ -127,84 +127,36 @@ void afficherSymbol(ELF_Symbol *table, int taille, FILE *fichier, Elf32_Section_
 }
 
 
+//-------------------- SECTION HEADER ---------------------------------
 
-void afficher_sh_name(char* name){
 
-    printf("%20s", name);
-    printf("\t");
-    
-}
-
-void afficher_sh_type(unsigned int type){
+char* getShType(unsigned int type){
 
     switch(type){
 
-        case 0 : printf("SHT_NULL"); break;
-        case 1 : printf("SHT_PROGBITS"); break;
-        case 2 : printf("SHT_SYMTAB"); break;
-        case 3 : printf("SHT_STRTAB"); break;
-        case 4 : printf("SHT_RELA\t"); break;
-        case 5 : printf("SHT_HASH"); break;
-        case 6 : printf("SHT_DYNAMIC"); break;
-        case 7 : printf("SHT_NOTE"); break;
-        case 8 : printf("SHT_NOBITS"); break;
-        case 9 : printf("SHT_REL\t"); break;
-        case 10 : printf("SHT_SHLIB"); break;
-        case 11 : printf("SHT_DYNSYM"); break;
-        case 1879048192 : printf("SHT_LOPROC"); break;
-        case 2147483647 : printf("SHT_HIPROC"); break;
-        case 2147483648 : printf("SHT_LOUSER"); break;
-        case 4294967295 : printf("SHT_HIUSER"); break;
-        case 1879048195 : printf("SHT_ARM_ATTR"); break;
-        case 1879048194 : printf("SHT_ARM_PREE"); break;
-        case 1879048193 : printf("SHT_ARM_EXIDX"); break;
-        default : printf("   ?  \t ");
+        case SHT_NULL : return "SHT_NULL"; break;
+        case SHT_PROGBITS : return "SHT_PROGBITS"; break;
+        case SHT_SYMTAB : return "SHT_SYMTAB"; break;
+        case SHT_STRTAB : return "SHT_STRTAB"; break;
+        case SHT_RELA : return "SHT_RELA\t"; break;
+        case SHT_HASH : return "SHT_HASH"; break;
+        case SHT_DYNAMIC : return "SHT_DYNAMIC"; break;
+        case SHT_NOTE : return "SHT_NOTE"; break;
+        case SHT_NOBITS : return "SHT_NOBITS"; break;
+        case SHT_REL : return "SHT_REL\t"; break;
+        case SHT_SHLIB : return "SHT_SHLIB"; break;
+        case SHT_DYNSYM : return "SHT_DYNSYM"; break;
+        case SHT_LOPROC : return "SHT_LOPROC"; break;
+        case SHT_HIPROC : return "SHT_HIPROC"; break;
+        case SHT_LOUSER : return "SHT_LOUSER"; break;
+        case SHT_HIUSER : return "SHT_HIUSER"; break;
+        case SHT_ARM_ATTRIBUTES : return "SHT_ARM_ATTR"; break;
+        case SHT_ARM_PREEMPTMAP : return "SHT_ARM_PREE"; break;
+        case SHT_ARM_EXIDX : return "SHT_ARM_EXIDX"; break;
+        default : return "   ?  \t ";
     }
-    printf("\t");
 }
 
-void afficher_sh_addr(unsigned int addr){
-
-    printf("%08x\t", addr);
-
-}
-
-void afficher_sh_offset(unsigned int offset){
-
-    printf("%06x\t", offset);
-
-}
-
-void afficher_sh_size(unsigned int size){
-
-    printf("%06x\t", size);
-
-}
-
-void afficher_sh_link(unsigned int link){
-
-    printf("%d\t", link);
-
-}
-
-void afficher_sh_info(unsigned int info){
-
-    printf("%d\t", info);
-
-}
-
-void afficher_sh_addralign(unsigned int addralign){
-
-    printf("%x\t", addralign);
-
-
-}
-
-void afficher_sh_entsize(unsigned int entsize){
-
-    printf("%02x\t", entsize);
-
-}
 
 void afficher_sh_flags(unsigned int flags){
     unsigned int res = (flags & SHF_WRITE);
@@ -286,25 +238,17 @@ char* getName(FILE *fichier, unsigned int address){
 
 
 
-void afficher_sectiontable(Elf32_Section_Header *tab, uint16_t nb, FILE *fichier){
+void afficher_section_table(Elf32_Section_Header *tab, uint16_t nb, FILE *fichier){
 
     printf("Section Headers:\n");
-    printf("  [Nr] \t          Name \t         Type \t         Addr \t        Off \t Size \t ES \t Flg \t Lk \t Inf \t Al \n");
+    printf("  [Nr] \t          Name \t         Type \t         Addr \t          Off \t Size \tES \tFlg \tLk\tInf \tAl \n");
     int i = 0;
 
     while(i<nb){
         
-        printf("  [%d]\t", i);
-        afficher_sh_name(getName(fichier, tab[i].sh_name));
-        afficher_sh_type(tab[i].sh_type);
-        afficher_sh_addr(tab[i].sh_addr);
-        afficher_sh_offset(tab[i].sh_offset);
-        afficher_sh_size(tab[i].sh_size);
-        afficher_sh_entsize(tab[i].sh_entsize);
+        printf("  [%d]%20s\t%s\t%.8hx\t%.6hx\t%06x\t%02x\t", i, getName(fichier, tab[i].sh_name), getShType(tab[i].sh_type), tab[i].sh_addr, tab[i].sh_offset, tab[i].sh_size, tab[i].sh_entsize);
         afficher_sh_flags(tab[i].sh_flags);
-        afficher_sh_link(tab[i].sh_link);
-        afficher_sh_info(tab[i].sh_info);
-        afficher_sh_addralign(tab[i].sh_addralign);
+        printf("%d\t%d\t%x",tab[i].sh_link,tab[i].sh_info,tab[i].sh_addralign);
 
         i++;
         printf("\n");
@@ -315,6 +259,7 @@ void afficher_sectiontable(Elf32_Section_Header *tab, uint16_t nb, FILE *fichier
 
 
 void afficher_section(Elf32_Section_Header *tab , int nb ,FILE *fichier){
+    
     printf("Affichage de la section numero %d, de nom", nb);
     char * name = getName(fichier, tab[nb].sh_name);
     printf(" %s \n", name);
@@ -340,6 +285,7 @@ void afficher_section(Elf32_Section_Header *tab , int nb ,FILE *fichier){
         }
         printf("\n");
     }
+    printf("\n");
 }
 
 
@@ -520,7 +466,7 @@ void afficher_header(ELF_Header *Header){
     printf("  Number of program headers:         %d\n", Header->e_phnum);
     printf("  Size of section headers:           %d (bytes)\n", Header->e_shentsize);
     printf("  Number of section headers:         %d\n", Header->e_shnum);
-    printf("  Section header string table index: %d\n", Header->e_shstrndx);
+    printf("  Section header string table index: %d\n\n", Header->e_shstrndx);
 }
 
 
