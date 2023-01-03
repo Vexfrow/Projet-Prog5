@@ -38,11 +38,16 @@ testSectionHeader(){
             exit
         fi
 
-
-
         ((i+=1))
     done < resultatAttendu
-    echo "[SECTION HEADER] OK pour $1"
+
+    if [[ `sed -n "$i"p resultatObtenu | wc -w` -eq 0 ]]
+    then 
+        echo "[SECTION HEADER] OK pour $1"
+    else
+        echo "[SECTION HEADER] ECHEC pour $1 : Nombre de lignes différent"
+        exit
+    fi
     
 }
 
@@ -56,7 +61,7 @@ testSymbolTable(){
     i=1
     while read -r ligneA;
     do
-        ligneO=`cat resultatObtenu | head -n $i | tail -n -1`
+        ligneO=`sed -n "$i"p resultatObtenu`
 
         if [ "$ligneA" != "$ligneO" ]
         then
@@ -70,11 +75,17 @@ testSymbolTable(){
             exit
         fi
 
-
-
         ((i+=1))
     done < resultatAttendu
-    echo "[SYMBOL TABLE] OK pour $1"
+
+
+    if [[ `sed -n "$i"p resultatObtenu | wc -w` -eq 0 ]]
+    then 
+        echo "[SYMBOL TABLE] OK pour $1"
+    else
+        echo "[SYMBOL TABLE] ECHEC pour $1 : Nombre de lignes différent"
+        exit
+    fi
  
 }
 
