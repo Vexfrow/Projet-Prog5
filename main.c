@@ -29,7 +29,7 @@ void afficherSymbolTable(FILE *fichier){
     init_section_header(fichier, header->e_shnum, header->e_shoff, Section_header_tab, header->e_shstrndx);
     ELF_Symbol *sym=tableSymbol(fichier, Section_header_tab, header->e_shnum);
 
-    afficherSymbol(sym, tailleTableSymbol(Section_header_tab, header->e_shnum), fichier, Section_header_tab);
+    afficherSymbol(sym, tailleTableSymbol(Section_header_tab, header->e_shnum), fichier, Section_header_tab, header->e_shnum);
 }
 
 
@@ -41,7 +41,7 @@ void afficherAll(FILE *fichier){
     
     afficher_header(header);
     afficher_section_table(Section_header_tab, header->e_shnum, fichier);
-    afficherSymbol(sym, tailleTableSymbol(Section_header_tab, header->e_shnum), fichier, Section_header_tab);
+    afficherSymbol(sym, tailleTableSymbol(Section_header_tab, header->e_shnum), fichier, Section_header_tab, header->e_shnum);
 }
 
 

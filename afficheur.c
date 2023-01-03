@@ -99,7 +99,7 @@ char *calculNdx(uint16_t ndx, int taille ){
 
 //table[i].st_info & 0xf
 
-void afficherSymbol(ELF_Symbol *table, int taille, FILE *fichier, Elf32_Section_Header *tab){
+void afficherSymbol(ELF_Symbol *table, int taille, FILE *fichier, Elf32_Section_Header *tab, int tailleSectionHeader){
     fprintf(stdout, "Num :\tValue \tSize\tType\tBind \tVis \t Ndx\t Name\n");
 
 
@@ -113,7 +113,7 @@ void afficherSymbol(ELF_Symbol *table, int taille, FILE *fichier, Elf32_Section_
     int adressSymbolStringTable = tab[tab[j].sh_link].sh_addr + tab[tab[j].sh_link].sh_offset;
 
     for(int i =0; i < taille; i++){
-        char* res = calculNdx(table[i].st_shndx, taille);
+        char* res = calculNdx(table[i].st_shndx, tailleSectionHeader);
 
         if((strcmp(type(table[i].st_info & 0xf), "SECTION") )) {
             fprintf(stdout, "%d:\t%.8x %d\t%s\t%s\tDEFAULT\t %s\t %s\t\n", i, table[i].st_value, table[i].st_size, type(table[i].st_info & 0xf), binding(table[i].st_info >> 4), res, getName(fichier,adressSymbolStringTable + table[i].st_name));

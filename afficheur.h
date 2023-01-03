@@ -7,7 +7,7 @@
 
 
 
-void afficherSymbol(ELF_Symbol *table, int taille, FILE *fichier, Elf32_Section_Header *tab);
+void afficherSymbol(ELF_Symbol *table, int taille, FILE *fichier, Elf32_Section_Header *tab, int tailleSectionHeader);
 
 
 //Permet de récupèrer le type de la section
