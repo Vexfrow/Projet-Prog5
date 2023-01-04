@@ -5,11 +5,18 @@
 #include <stdint.h>
 #include <stdio.h>
 
-unsigned char lecture1octet(FILE *fichier);
+typedef struct {
+    unsigned char *fichier;
+    int adr;
+    int size;
+} lecteur;
 
-uint16_t lecture2octet(FILE *fichier);
+lecteur *init_lecture(FILE *fichier);
 
-int lecture4octet(FILE *fichier);
+unsigned char lecture1octet(lecteur *lecteur);
+
+uint16_t lecture2octet(lecteur *lecteur);
+uint32_t lecture4octet(lecteur *lecteur);
 
 uint16_t littleEndianLecture2octet(FILE *fichier);
 
