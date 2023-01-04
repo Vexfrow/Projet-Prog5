@@ -1,4 +1,29 @@
 #include "reader_binaire.h"
+#include <stdlib.h>
+
+
+lecteur *init_lecture(FILE *fichier){
+    lecteur *lecteur;
+    int size = 0;
+    int i = 0;
+    fseek(fichier, 0, SEEK_END);
+    lecteur->size = ftell(fichier);
+    lecteur->adr = 0;
+    lecteur->fichier=malloc(sizeof(char)*lecteur->size);
+    if(!lecteur->fichier){
+        free(lecteur->fichier);
+        printf("Erreur d'initialisation du malloc fichier");
+    }
+    unsigned char octet;
+    fseek(fichier,0, SEEK_SET);
+    while(i<lecteur->size){
+        fread(&octet,1,1,fichier);
+        lecteur->fichier[i]=octet;
+        i++;
+    }
+    return lecteur;
+}
+
 
 unsigned char lecture1octet(FILE *fichier){
     unsigned char res;
