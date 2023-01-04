@@ -87,6 +87,7 @@ char *calculNdx(uint16_t ndx, int taille ){
                     return "HIRESERVE";
                     break;
                 default:
+                    printf("ndx vaut:%d",ndx);
                     fprintf(stderr, "Erreur de lecture ndx");
                     exit(2);
             }
@@ -99,7 +100,8 @@ char *calculNdx(uint16_t ndx, int taille ){
 
 //table[i].st_info & 0xf
 
-void afficherSymbol(ELF_Symbol *table, int taille, FILE *fichier, Elf32_Section_Header *tab, int tailleSectionHeader){
+void afficherSymbol(ELF_Symbol *table, int taille, lecteur *lecteur, Elf32_Section_Header *tab, int tailleSectionHeader){
+    lecteur->adr=0;
     fprintf(stdout, "Num :\tValue \tSize\tType\tBind \tVis \t Ndx\t Name\n");
 
 
@@ -116,9 +118,9 @@ void afficherSymbol(ELF_Symbol *table, int taille, FILE *fichier, Elf32_Section_
         char* res = calculNdx(table[i].st_shndx, tailleSectionHeader);
 
         if((strcmp(type(table[i].st_info & 0xf), "SECTION") )) {
-            fprintf(stdout, "%d:\t%.8x %d\t%s\t%s\tDEFAULT\t %s\t %s\t\n", i, table[i].st_value, table[i].st_size, type(table[i].st_info & 0xf), binding(table[i].st_info >> 4), res, getName(fichier,adressSymbolStringTable + table[i].st_name));
+            fprintf(stdout, "%d:\t%.8x %d\t%s\t%s\tDEFAULT\t %s\t %s\t\n", i, table[i].st_value, table[i].st_size, type(table[i].st_info & 0xf), binding(table[i].st_info >> 4), res, getName(lecteur,adressSymbolStringTable + table[i].st_name));
         }else{
-            fprintf(stdout, "%d:\t%.8x %d\t%s\t%s\tDEFAULT\t %s\t %s\t\n", i, table[i].st_value, table[i].st_size, type(table[i].st_info & 0xf), binding(table[i].st_info >> 4), res, getName(fichier, tab[atoi(res)].sh_name + table[i].st_name));
+            fprintf(stdout, "%d:\t%.8x %d\t%s\t%s\tDEFAULT\t %s\t %s\t\n", i, table[i].st_value, table[i].st_size, type(table[i].st_info & 0xf), binding(table[i].st_info >> 4), res, getName(lecteur, tab[atoi(res)].sh_name + table[i].st_name));
 
         }
         
@@ -217,36 +219,15 @@ void afficher_sh_flags(unsigned int flags){
 
 }
 
-
-
-char* getName(FILE *fichier, unsigned int address){
-    char name[50];
-    fseek(fichier, address, SEEK_SET);
-    char c = fgetc(fichier);
-
-    int i = 0;
-    while(c != '\0'){
-        name[i] = c;
-        i++;
-        c = fgetc(fichier);
-    }
-    name[i] = '\0';
-    char* res = name;
-    return res;
-}
-
-
-
-
-void afficher_section_table(Elf32_Section_Header *tab, uint16_t nb, FILE *fichier){
-
+void afficher_section_table(Elf32_Section_Header *tab, uint16_t nb, lecteur *lecteur){
+    lecteur->adr=0;
     printf("Section Headers:\n");
     printf("  [Nr] \t          Name \t         Type \t         Addr \t          Off \t Size \tES \tFlg \tLk\tInf \tAl \n");
     int i = 0;
 
     while(i<nb){
         
-        printf("  [%d]%20s\t%s\t%.8hx\t%.6hx\t%06x\t%02x\t", i, getName(fichier, tab[i].sh_name), getShType(tab[i].sh_type), tab[i].sh_addr, tab[i].sh_offset, tab[i].sh_size, tab[i].sh_entsize);
+        printf("  [%d]%20s\t%s\t%.8hx\t%.6hx\t%06x\t%02x\t", i, getName(lecteur, tab[i].sh_name), getShType(tab[i].sh_type), tab[i].sh_addr, tab[i].sh_offset, tab[i].sh_size, tab[i].sh_entsize);
         afficher_sh_flags(tab[i].sh_flags);
         printf("%d\t%d\t%x",tab[i].sh_link,tab[i].sh_info,tab[i].sh_addralign);
 
@@ -258,17 +239,18 @@ void afficher_section_table(Elf32_Section_Header *tab, uint16_t nb, FILE *fichie
 
 
 
-void afficher_section(Elf32_Section_Header *tab , int nb ,FILE *fichier){
+void afficher_section(Elf32_Section_Header *tab , int nb ,lecteur *lecteur){
+    lecteur->adr=0;
     
     printf("Affichage de la section numero %d, de nom", nb);
-    char * name = getName(fichier, tab[nb].sh_name);
+    char * name = getName(lecteur, tab[nb].sh_name);
     printf(" %s \n", name);
 
     int size = tab[nb].sh_size;
     if(!size){
         printf("Il n'y a pas de data dans cette section ");
     }else{
-        fseek(fichier,tab[nb].sh_addr + tab[nb].sh_offset, SEEK_SET);
+        lecteur->adr =tab[nb].sh_addr + tab[nb].sh_offset;
         int i = 0;
         unsigned char octet =0;
         while(i<size){
@@ -279,7 +261,7 @@ void afficher_section(Elf32_Section_Header *tab , int nb ,FILE *fichier){
                 
                 printf("\n 0x%.8hx ",i);
             }
-            octet = lecture1octet(fichier);
+            octet = lecture1octet(lecteur);
             printf("%.2hx",octet);
             i++;
         }
@@ -472,23 +454,356 @@ void afficher_header(ELF_Header *Header){
 
 //-------------------------------------------------------------------------------------------------------
 
-void afficherRelocations(Elf32_Section_Header *Rel_section_tab ,ELF_Rel *ELF_tab, ELF_Symbol *sym, int nb_ELF, int nb_section, FILE *fichier){
+void afficherRelocations(Elf32_Section_Header *Rel_section_tab ,ELF_Rel *ELF_tab, ELF_Symbol *sym, int nb_ELF, int nb_section, lecteur *lecteur){
+    lecteur->adr=0;
     int i =0;
     int j =0;
     int nb=0;
+
+    
+
     while(j<nb_section){
         i=0;
-        printf("Relocation section '%s' at offset 0x%hx contains %d entries: \n", getName(fichier, Rel_section_tab[j].sh_name), Rel_section_tab[j].sh_offset,(Rel_section_tab[j].sh_size/8) );
-        printf("Offset \t Info \t Type \t \t Sym.Value \t Sym. Name\n");
+        printf("Relocation section '%s' at offset 0x%hx contains %d entries: \n", getName(lecteur, Rel_section_tab[j].sh_name), Rel_section_tab[j].sh_offset,(Rel_section_tab[j].sh_size/8) );
+        printf("Offset \t Info \t \t Type \t \t Sym.Value \t Sym. Name\n");
         while(i < (Rel_section_tab[j].sh_size/8)){
             printf("%.8hx ",ELF_tab[nb].r_offset);
             printf("%.8hx\t",ELF_tab[nb].r_info);
-
+            unsigned char type = ELF_tab[nb].r_info;
+            affichertypereloc(type);
+            int value = ELF_tab[nb].r_info >> 8;
+            printf("%.8x",sym[value].st_value);
             i++;
             nb++;
             printf("\n");
         }
         j++;
         printf("\n");
+    }
+}
+
+void affichertypereloc(unsigned char t) {
+    switch (t) {
+    case R_ARM_NONE:
+        printf("R_ARM_NONE        ");
+        break;
+    case R_ARM_PC24:
+        printf("R_ARM_PC24        ");
+        break;
+    case R_ARM_ABS32:
+        printf("R_ARM_ABS32       ");
+        break;
+    case R_ARM_REL32:
+        printf("R_ARM_REL32       ");
+        break;
+    case R_ARM_ABS16:
+        printf("R_ARM_ABS16       ");
+        break;
+    case R_ARM_ABS12:
+        printf("R_ARM_ABS12       ");
+        break;
+    case R_ARM_THM_ABS5:
+        printf("R_ARM_THM_ABS5    ");
+        break;
+    case R_ARM_ABS8:
+        printf("R_ARM_ABS8        ");
+        break;
+    case R_ARM_SBREL32:
+        printf("R_ARM_SBREL32     ");
+        break;
+    case R_ARM_THM_PC8:
+        printf("R_ARM_THM_PC8     ");
+        break;
+    case R_ARM_TLS_DESC:
+        printf("R_ARM_TLS_DESC    ");
+        break;
+    case R_ARM_THM_SWI8:
+        printf("R_ARM_THM_SWI8    ");
+        break;
+    case R_ARM_XPC25:
+        printf("R_ARM_XPC25       ");
+        break;
+    case R_ARM_THM_XPC22:
+        printf("R_ARM_THM_XPC22   ");
+        break;
+    case R_ARM_TLS_DTPMOD32:
+        printf("R_ARM_TLS_DTPMOD32 ");
+        break;
+    case R_ARM_TLS_DTPOFF32:
+        printf("R_ARM_TLS_DTPOFF32 ");
+        break;
+    case R_ARM_TLS_TPOFF32:
+        printf("R_ARM_TLS_TPOFF32 ");
+        break;
+    case R_ARM_COPY:
+        printf("R_ARM_COPY        ");
+        break;
+    case R_ARM_GLOB_DAT:
+        printf("R_ARM_GLOB_DAT    ");
+        break;
+    case R_ARM_JUMP_SLOT:
+        printf("R_ARM_JUMP_SLOT   ");
+        break;
+    case R_ARM_RELATIVE:
+        printf("R_ARM_RELATIVE    ");
+        break;
+    case R_ARM_PLT32:
+        printf("R_ARM_PLT32       ");
+        break;
+    case R_ARM_CALL:
+        printf("R_ARM_CALL        ");
+        break;
+    case R_ARM_JUMP24:
+        printf("R_ARM_JUMP24      ");
+        break;
+    case R_ARM_THM_JUMP24:
+        printf("R_ARM_THM_JUMP24  ");
+        break;
+    case R_ARM_BASE_ABS:
+        printf("R_ARM_BASE_ABS    ");
+        break;
+    case R_ARM_ALU_PCREL_7_0:
+        printf("R_ARM_ALU_PCREL_7_0 ");
+        break;
+    case R_ARM_ALU_PCREL_15_8:
+        printf("R_ARM_ALU_PCREL_15_8 ");
+        break;
+    case R_ARM_ALU_PCREL_23_15:
+        printf("R_ARM_ALU_PCREL_23_15 ");
+        break;
+    case R_ARM_TARGET1:
+        printf("R_ARM_TARGET1     ");
+        break;
+    case R_ARM_SBREL31:
+        printf("R_ARM_SBREL31     ");
+        break;
+    case R_ARM_V4BX:
+        printf("R_ARM_V4BX        ");
+        break;
+    case R_ARM_TARGET2:
+        printf("R_ARM_TARGET2     ");
+        break;
+    case R_ARM_PREL31:
+        printf("R_ARM_PREL31      ");
+        break;
+    case R_ARM_MOVW_ABS_NC:
+        printf("R_ARM_MOVW_ABS_NC ");
+        break;
+    case R_ARM_MOVT_ABS:
+        printf("R_ARM_MOVT_ABS    ");
+        break;
+    case R_ARM_MOVW_PREL_NC:
+        printf("R_ARM_MOVW_PREL_NC ");
+        break;
+    case R_ARM_MOVT_PREL:
+        printf("R_ARM_MOVT_PREL   ");
+        break;
+    case R_ARM_THM_MOVW_ABS_NC:
+        printf("R_ARM_THM_MOVW_ABS_NC ");
+        break;
+    case R_ARM_THM_MOVT_ABS:
+        printf("R_ARM_THM_MOVT_ABS ");
+        break;
+    case R_ARM_THM_MOVW_PREL_NC:
+        printf("R_ARM_THM_MOVW_PREL_NC ");
+        break;
+    case R_ARM_THM_MOVT_PREL:
+        printf("R_ARM_THM_MOVT_PREL ");
+        break;
+    case R_ARM_THM_JUMP19:
+        printf("R_ARM_THM_JUMP19  ");
+        break;
+    case R_ARM_THM_JUMP6:
+        printf("R_ARM_THM_JUMP6   ");
+        break;
+    case R_ARM_THM_ALU_PREL_11_0:
+        printf("R_ARM_THM_ALU_PREL_11_0 ");
+        break;
+    case R_ARM_THM_PC12:
+        printf("R_ARM_THM_PC12    ");
+        break;
+    case R_ARM_ABS32_NOI:
+        printf("R_ARM_ABS32_NOI   ");
+        break;
+    case R_ARM_REL32_NOI:
+        printf("R_ARM_REL32_NOI   ");
+        break;
+    case R_ARM_ALU_PC_G0_NC:
+        printf("R_ARM_ALU_PC_G0_NC ");
+        break;
+    case R_ARM_ALU_PC_G0:
+        printf("R_ARM_ALU_PC_G0   ");
+        break;
+    case R_ARM_ALU_PC_G1_NC:
+        printf("R_ARM_ALU_PC_G1_NC ");
+        break;
+    case R_ARM_ALU_PC_G1:
+        printf("R_ARM_ALU_PC_G1   ");
+        break;
+    case R_ARM_ALU_PC_G2:
+        printf("R_ARM_ALU_PC_G2   ");
+        break;
+    case R_ARM_LDR_PC_G1:
+        printf("R_ARM_LDR_PC_G1   ");
+        break;
+    case R_ARM_LDR_PC_G2:
+        printf("R_ARM_LDR_PC_G2   ");
+        break;
+    case R_ARM_LDRS_PC_G0:
+        printf("R_ARM_LDRS_PC_G0  ");
+        break;
+    case R_ARM_LDRS_PC_G1:
+        printf("R_ARM_LDRS_PC_G1  ");
+        break;
+    case R_ARM_LDRS_PC_G2:
+        printf("R_ARM_LDRS_PC_G2  ");
+        break;
+    case R_ARM_LDC_PC_G0:
+        printf("R_ARM_LDC_PC_G0   ");
+        break;
+    case R_ARM_LDC_PC_G1:
+        printf("R_ARM_LDC_PC_G1   ");
+        break;
+    case R_ARM_LDC_PC_G2:
+        printf("R_ARM_LDC_PC_G2   ");
+        break;
+    case R_ARM_ALU_SB_G0_NC:
+        printf("R_ARM_ALU_SB_G0_NC ");
+        break;
+    case R_ARM_ALU_SB_G0:
+        printf("R_ARM_ALU_SB_G0   ");
+        break;
+    case R_ARM_ALU_SB_G1_NC:
+        printf("R_ARM_ALU_SB_G1_NC ");
+        break;
+    case R_ARM_ALU_SB_G1:
+        printf("R_ARM_ALU_SB_G1   ");
+        break;
+    case R_ARM_ALU_SB_G2:
+        printf("R_ARM_ALU_SB_G2   ");
+        break;
+    case R_ARM_LDR_SB_G0:
+        printf("R_ARM_LDR_SB_G0   ");
+        break;
+    case R_ARM_LDR_SB_G1:
+        printf("R_ARM_LDR_SB_G1   ");
+        break;
+    case R_ARM_LDR_SB_G2:
+        printf("R_ARM_LDR_SB_G2   ");
+        break;
+    case R_ARM_LDRS_SB_G0:
+        printf("R_ARM_LDRS_SB_G0  ");
+        break;
+    case R_ARM_LDRS_SB_G1:
+        printf("R_ARM_LDRS_SB_G1  ");
+        break;
+    case R_ARM_LDRS_SB_G2:
+        printf("R_ARM_LDRS_SB_G2  ");
+        break;
+    case R_ARM_LDC_SB_G0:
+        printf("R_ARM_LDC_SB_G0   ");
+        break;
+    case R_ARM_LDC_SB_G1:
+        printf("R_ARM_LDC_SB_G1   ");
+        break;
+    case R_ARM_LDC_SB_G2:
+        printf("R_ARM_LDC_SB_G2   ");
+        break;
+    case R_ARM_MOVW_BREL_NC:
+        printf("R_ARM_MOVW_BREL_NC ");
+        break;
+    case R_ARM_MOVT_BREL:
+        printf("R_ARM_MOVT_BREL   ");
+        break;
+    case R_ARM_MOVW_BREL:
+        printf("R_ARM_MOVW_BREL   ");
+        break;
+    case R_ARM_THM_MOVW_BREL_NC:
+        printf("R_ARM_THM_MOVW_BREL_NC ");
+        break;
+    case R_ARM_THM_MOVT_BREL:
+        printf("R_ARM_THM_MOVT_BREL ");
+        break;
+    case R_ARM_THM_MOVW_BREL:
+        printf("R_ARM_THM_MOVW_BREL ");
+        break;
+    case R_ARM_TLS_GOTDESC:
+        printf("R_ARM_TLS_GOTDESC ");
+        break;
+    case R_ARM_TLS_CALL:
+        printf("R_ARM_TLS_CALL    ");
+        break;
+    case R_ARM_TLS_DESCSEQ:
+        printf("R_ARM_TLS_DESCSEQ ");
+        break;
+    case R_ARM_THM_TLS_CALL:
+        printf("R_ARM_THM_TLS_CALL ");
+        break;
+    case R_ARM_PLT32_ABS:
+        printf("R_ARM_PLT32_ABS   ");
+        break;
+    case R_ARM_GOT_ABS:
+        printf("R_ARM_GOT_ABS     ");
+        break;
+    case R_ARM_GOT_PREL:
+        printf("R_ARM_GOT_PREL    ");
+        break;
+    case R_ARM_GOT_BREL12:
+        printf("R_ARM_GOT_BREL12  ");
+        break;
+    case R_ARM_GOTOFF12:
+        printf("R_ARM_GOTOFF12    ");
+        break;
+    case R_ARM_GOTRELAX:
+        printf("R_ARM_GOTRELAX    ");
+        break;
+    case R_ARM_GNU_VTENTRY:
+        printf("R_ARM_GNU_VTENTRY ");
+        break;
+    case R_ARM_GNU_VTINHERIT:
+        printf("R_ARM_GNU_VTINHERIT ");
+        break;
+    case R_ARM_TLS_GD32:
+        printf("R_ARM_TLS_GD32    ");
+        break;
+    case R_ARM_TLS_LDM32:
+        printf("R_ARM_TLS_LDM32   ");
+        break;
+    case R_ARM_TLS_LDO32:
+        printf("R_ARM_TLS_LDO32   ");
+        break;
+    case R_ARM_TLS_IE32:
+        printf("R_ARM_TLS_IE32    ");
+        break;
+    case R_ARM_TLS_LE32:
+        printf("R_ARM_TLS_LE32    ");
+        break;
+    case R_ARM_TLS_LDO12:
+        printf("R_ARM_TLS_LDO12   ");
+        break;
+    case R_ARM_TLS_LE12:
+        printf("R_ARM_TLS_LE12    ");
+        break;
+    case R_ARM_TLS_IE12GP:
+        printf("R_ARM_TLS_IE12GP  ");
+        break;
+    case R_ARM_ME_TOO:
+        printf("R_ARM_ME_TOO      ");
+        break;
+    case R_ARM_THM_TLS_DESCSEQ16:
+        printf("R_ARM_THM_TLS_DESCSEQ16 ");
+        break;
+    case R_ARM_THM_TLS_DESCSEQ32:
+        printf("R_ARM_THM_TLS_DESCSEQ32 ");
+        break;
+    case R_ARM_THM_GOT_BREL12:
+        printf("R_ARM_THM_GOT_BREL12 ");
+        break;
+    case R_ARM_IRELATIVE:
+        printf("R_ARM_IRELATIVE   ");
+        break;
+    default:
+        printf("                  ");
+        break;
     }
 }

@@ -7,7 +7,7 @@
 
 
 
-void afficherSymbol(ELF_Symbol *table, int taille, FILE *fichier, Elf32_Section_Header *tab, int tailleSectionHeader);
+void afficherSymbol(ELF_Symbol *table, int taille, lecteur *lecteur, Elf32_Section_Header *tab, int tailleSectionHeader);
 
 
 //Permet de récupèrer le type de la section
@@ -18,15 +18,15 @@ void afficher_sh_flags(unsigned int flags);
 
 
 //Permet d'afficher la table des sections 
-void afficher_section_table(Elf32_Section_Header *tab, uint16_t nb, FILE *fichier);
+void afficher_section_table(Elf32_Section_Header *tab, uint16_t nb, lecteur *lecteur);
 
 
 //Permet d'afficher le contenue d'une fonction à partir de son idex dans la table des sections 
-void afficher_section(Elf32_Section_Header *tab , int nb ,FILE *fichier);
+void afficher_section(Elf32_Section_Header *tab , int nb ,lecteur *lecteur);
 
 
-//Permet de récupèrer un string à partir d'un fichier et de sa position dans ce dit fichier
-char* getName(FILE *fichier, unsigned int address);
+//Permet de récupèrer un string à partir d'un lecteur et de sa position dans ce dit lecteur
+
 
 
 // Affichage de l'Header: ------------------------
@@ -58,8 +58,8 @@ char *getMachine(uint16_t c);
 // Affiche le header (similaire à 'arm-none-eabi-readelf -h {file_name}.o')
 void afficher_header(ELF_Header *Header);
 
-void afficherRelocations(Elf32_Section_Header *Rel_section_tab ,ELF_Rel *ELF_tab, ELF_Symbol *sym, int nb_ELF, int nb_section, FILE *fichier);
+void afficherRelocations(Elf32_Section_Header *Rel_section_tab ,ELF_Rel *ELF_tab, ELF_Symbol *sym, int nb_ELF, int nb_section, lecteur *lecteur);
 
-
+void affichertypereloc(unsigned char t);
 
 #endif

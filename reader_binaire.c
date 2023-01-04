@@ -4,8 +4,6 @@
 
 lecteur *init_lecture(FILE *fichier){
     lecteur *lecteur;
-    int size = 0;
-    int i = 0;
     fseek(fichier, 0, SEEK_END);
     lecteur->size = ftell(fichier);
     lecteur->adr = 0;
@@ -14,31 +12,42 @@ lecteur *init_lecture(FILE *fichier){
         free(lecteur->fichier);
         printf("Erreur d'initialisation du malloc fichier");
     }
-    unsigned char octet;
     fseek(fichier,0, SEEK_SET);
-    while(i<lecteur->size){
-        fread(&octet,1,1,fichier);
-        lecteur->fichier[i]=octet;
-        i++;
-    }
+    fread(lecteur->fichier,sizeof(unsigned char),lecteur->size,fichier);
+    fclose(fichier);
     return lecteur;
 }
 
 
-unsigned char lecture1octet(FILE *fichier){
-    unsigned char res;
-    fread(&res,1,1,fichier);
-    return res;
+unsigned char lecture1octet(lecteur *lecteur){
+    unsigned char i =0;
+    if(lecteur->adr < lecteur->size){
+        i = lecteur->fichier[lecteur->adr];
+        lecteur->adr++;
+    }
+    return i;
 }
 
-uint16_t lecture2octet(FILE *fichier){
-    uint16_t octet;
-    fread(&octet, 2,1, fichier);
-    return octet;
+uint16_t lecture2octet(lecteur *lecteur){
+    uint16_t octet = 0;
+    uint16_t tampon =0;
+    if(lecteur->adr < lecteur->size-1){
+        octet = lecteur->fichier[lecteur->adr];
+        lecteur->adr++;
+        tampon = lecteur->fichier[lecteur->adr];
+        octet = (tampon << 8) + octet;
+        lecteur->adr++;
+    }
+    return octet;   
 }
 
-int lecture4octet(FILE *fichier){
-    int entier;
-    fread(&entier,4, 1, fichier);
-    return entier;
+uint32_t lecture4octet(lecteur *lecteur){
+    uint32_t octet = 0;
+    uint32_t tampon =0;
+    if(lecteur->adr < lecteur->size-3){
+        octet = lecture2octet(lecteur);
+        tampon = lecture2octet(lecteur);
+        octet = (tampon << 16)+ octet;
+    }
+    return octet; 
 }

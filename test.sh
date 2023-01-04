@@ -55,7 +55,7 @@ testSectionHeader(){
 testSymbolTable(){
 
     arm-none-eabi-readelf -s -W $1 | tail -n +4 | sed -r 's/ //g' | sed -r 's/\t//g' > resultatAttendu   
-    ./main -st $1 | tail -n +2 | sed -r 's/ //g' | sed -r 's/\t//g'> resultatObtenu
+    ./main -s $1 | tail -n +2 | sed -r 's/ //g' | sed -r 's/\t//g'> resultatObtenu
 
     i=1
     while read -r ligneA;

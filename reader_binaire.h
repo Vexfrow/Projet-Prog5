@@ -6,17 +6,16 @@
 #include <stdio.h>
 
 typedef struct {
-    char *fichier;
+    unsigned char *fichier;
     int adr;
     int size;
 } lecteur;
 
 lecteur *init_lecture(FILE *fichier);
 
-unsigned char lecture1octet(FILE *fichier);
+unsigned char lecture1octet(lecteur *lecteur);
 
-uint16_t lecture2octet(FILE *fichier);
-
-int lecture4octet(FILE *fichier);
+uint16_t lecture2octet(lecteur *lecteur);
+uint32_t lecture4octet(lecteur *lecteur);
 
 #endif 
