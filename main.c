@@ -20,15 +20,17 @@ void usage() {
 void afficherRelocationsInit(lecteur *lecteur){
 
     ELF_Header *elf_header = init_header(lecteur);
-    Elf32_Section_Header *Section_header_tab = init_section_header(lecteur, elf_header);
-    ELF_Symbol *sym = init_symbol_table(lecteur, Section_header_tab, elf_header->e_shnum);
+    Elf32_Section_Header *section_header_tab = init_section_header(lecteur, elf_header);
+    ELF_Symbol *symbol_table = init_symbol_table(lecteur, elf_header, section_header_tab);
+
+
     int i = 0;
     int nb_section =0;
     int nb_ELF =0;
     while( i< elf_header->e_shnum){
-        if(Section_header_tab[i].sh_type == 9){
+        if(section_header_tab[i].sh_type == 9){
             nb_section++;
-            nb_ELF = nb_ELF + (Section_header_tab[i].sh_size/8);
+            nb_ELF = nb_ELF + (section_header_tab[i].sh_size/8);
         }
         i++;
     }
@@ -36,17 +38,17 @@ void afficherRelocationsInit(lecteur *lecteur){
     int j=0;
     i=0;
     while(i< elf_header->e_shnum){
-        if(Section_header_tab[i].sh_type == 9){
-            Rel_section_tab[j].sh_name = Section_header_tab[i].sh_name;
-            Rel_section_tab[j].sh_type = Section_header_tab[i].sh_type;
-            Rel_section_tab[j].sh_flags = Section_header_tab[i].sh_flags;
-            Rel_section_tab[j].sh_addr = Section_header_tab[i].sh_addr;
-            Rel_section_tab[j].sh_offset = Section_header_tab[i].sh_offset;
-            Rel_section_tab[j].sh_size = Section_header_tab[i].sh_size;
-            Rel_section_tab[j].sh_link = Section_header_tab[i].sh_link;
-            Rel_section_tab[j].sh_info = Section_header_tab[i].sh_info;
-            Rel_section_tab[j].sh_addralign = Section_header_tab[i].sh_addralign;
-            Rel_section_tab[j].sh_entsize = Section_header_tab[i].sh_entsize;
+        if(section_header_tab[i].sh_type == 9){
+            Rel_section_tab[j].sh_name = section_header_tab[i].sh_name;
+            Rel_section_tab[j].sh_type = section_header_tab[i].sh_type;
+            Rel_section_tab[j].sh_flags = section_header_tab[i].sh_flags;
+            Rel_section_tab[j].sh_addr = section_header_tab[i].sh_addr;
+            Rel_section_tab[j].sh_offset = section_header_tab[i].sh_offset;
+            Rel_section_tab[j].sh_size = section_header_tab[i].sh_size;
+            Rel_section_tab[j].sh_link = section_header_tab[i].sh_link;
+            Rel_section_tab[j].sh_info = section_header_tab[i].sh_info;
+            Rel_section_tab[j].sh_addralign = section_header_tab[i].sh_addralign;
+            Rel_section_tab[j].sh_entsize = section_header_tab[i].sh_entsize;
             j++;
         }
         i++;
@@ -55,7 +57,7 @@ void afficherRelocationsInit(lecteur *lecteur){
     init_relocationTab(Rel_section_tab, ELF_tab, nb_ELF, lecteur);
     
 
-    afficherRelocations(Rel_section_tab, ELF_tab, sym, nb_ELF, nb_section, lecteur);
+    afficherRelocations(Rel_section_tab, ELF_tab, symbol_table, nb_ELF, nb_section, lecteur);
 
 }
 
@@ -121,26 +123,25 @@ int main(int argc, char *argv[]) {
     //On inialise toute les structures necessaires
     lecteur *lecteur = init_lecture(fichier);
     ELF_Header *elf_header = init_header(lecteur);
-    Elf32_Section_Header *Section_header_tab = init_section_header(lecteur, elf_header);
-    ELF_Symbol *sym = init_symbol_table(lecteur, Section_header_tab, elf_header->e_shnum);
+    Elf32_Section_Header *section_header_tab = init_section_header(lecteur, elf_header);
+    ELF_Symbol *symbol_table = init_symbol_table(lecteur, elf_header, section_header_tab);
 
     if(all){
         afficher_header(elf_header);
-        afficher_section_table(Section_header_tab, elf_header->e_shnum, lecteur);
-        afficherSymbol(sym, tailleTableSymbol(Section_header_tab, elf_header->e_shnum), lecteur, Section_header_tab, elf_header->e_shstrndx);
+        afficher_section_table(lecteur, elf_header, section_header_tab);
+        afficherSymbol(lecteur, elf_header, section_header_tab, symbol_table);
         afficherRelocationsInit(lecteur);
     }else if(header){
         afficher_header(elf_header);
     }else if (sectionHeader){
-        afficher_section_table(Section_header_tab, elf_header->e_shnum, lecteur);
+        afficher_section_table(lecteur, elf_header, section_header_tab);
     }else if(symbolTable){
-        afficherSymbol(sym, tailleTableSymbol(Section_header_tab, elf_header->e_shnum), lecteur, Section_header_tab, elf_header->e_shstrndx);
-
+        afficherSymbol(lecteur, elf_header, section_header_tab, symbol_table);
     }else if(uniqueSection){
         if(uniqueSection <= elf_header->e_shnum){
-        afficher_section(Section_header_tab, uniqueSection, lecteur);
+            afficher_section(section_header_tab, uniqueSection, lecteur);
         }else{
-            fprintf(stderr, "readelf: Warning: Section %d was not dumped because it does not exist!",uniqueSection);
+            fprintf(stderr, "readelf: Warning: Section %d was not dumped because it does not exist!", uniqueSection);
             exit(1);
         }
 

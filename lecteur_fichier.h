@@ -56,7 +56,7 @@ typedef struct {
 
 
 // ----------------------------------------------------------------------------------------
-
+//Permet de récupèrer un string à partir d'un lecteur et de sa position dans ce dit lecteur
 char* getName(lecteur *lecteur, unsigned int address);
 // ----------------------------------------------------------------------------------------
 
@@ -75,11 +75,11 @@ void init_relocationTab(Elf32_Section_Header *Rel_section_tab,  ELF_Rel *ELF_tab
 
 // ----------------------------------------------------------------------------------------
 
-ELF_Symbol *init_symbol_table(lecteur *lecteur, Elf32_Section_Header *sectionHead, int tailleSectionTable);
+ELF_Symbol *init_symbol_table(lecteur *lecteur, ELF_Header *elf_header, Elf32_Section_Header *section_header);
 
-ELF_Symbol *remplirSymbol(lecteur *lecteur, ELF_Symbol *table, int taille);
+ELF_Symbol *remplirTableSymbol(lecteur *lecteur, ELF_Symbol *table, int taille);
 
-int tailleTableSymbol(Elf32_Section_Header *sectionHead, int tailleSectionTable);
+int getIndexSymbolTableSection(ELF_Header *elf_header, Elf32_Section_Header *section_header);
 
 // ----------------------------------------------------------------------------------------
 #endif

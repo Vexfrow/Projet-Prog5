@@ -2,7 +2,11 @@
 #include "reader_binaire.h"
 #include "string.h"
 
-char *binding(char bind){
+
+
+//------------------------- SYMBOL TABLE ----------------------------
+
+char *getBinding(char bind){
     switch(bind){
             case 0:
                 return "LOCAL";
@@ -28,7 +32,7 @@ char *binding(char bind){
 }
 
 
-char *type(char vis){
+char *getStType(char vis){
     switch(vis){
         case 0:
             return "NOTYPE";
@@ -100,27 +104,21 @@ char *calculNdx(uint16_t ndx, int taille ){
 
 //table[i].st_info & 0xf
 
-void afficherSymbol(ELF_Symbol *table, int taille, lecteur *lecteur, Elf32_Section_Header *tab, int tailleSectionHeader){
-    lecteur->adr=0;
+void afficherSymbol(lecteur *lecteur, ELF_Header *elf_header, Elf32_Section_Header *section_header_tab, ELF_Symbol *symbol_table){
     fprintf(stdout, "Num :\tValue \tSize\tType\tBind \tVis \t Ndx\t Name\n");
 
 
-    //On récupère l'index dans le header section du SYM
-    int j = 0;
-    while(tab[j].sh_type != SHT_SYMTAB){
-        j++;
-    }
-
-    //On calcul l'adresse de l'endroit où est stocké la "symbol string table" grâce à l'index contenue dans "sh_link"
-    int adressSymbolStringTable = tab[tab[j].sh_link].sh_addr + tab[tab[j].sh_link].sh_offset;
+    int indexSymbolTableSection = getIndexSymbolTableSection(elf_header, section_header_tab);
+    int adressSymbolStringTable = section_header_tab[section_header_tab[indexSymbolTableSection].sh_link].sh_offset;
+    int taille = section_header_tab[indexSymbolTableSection].sh_size / 16;
 
     for(int i =0; i < taille; i++){
-        char* res = calculNdx(table[i].st_shndx, tailleSectionHeader);
+        char* res = calculNdx(symbol_table[i].st_shndx, elf_header->e_shnum);
 
-        if((strcmp(type(table[i].st_info & 0xf), "SECTION") )) {
-            fprintf(stdout, "%d:\t%.8x %d\t%s\t%s\tDEFAULT\t %s\t %s\t\n", i, table[i].st_value, table[i].st_size, type(table[i].st_info & 0xf), binding(table[i].st_info >> 4), res, getName(lecteur,adressSymbolStringTable + table[i].st_name));
+        if((strcmp(getStType(symbol_table[i].st_info & 0xf), "SECTION") )) {
+            fprintf(stdout, "%d:\t%.8x %d\t%s\t%s\tDEFAULT\t %s\t %s\t\n", i, symbol_table[i].st_value, symbol_table[i].st_size, getStType(symbol_table[i].st_info & 0xf), getBinding(symbol_table[i].st_info >> 4), res, getName(lecteur,adressSymbolStringTable + symbol_table[i].st_name));
         }else{
-            fprintf(stdout, "%d:\t%.8x %d\t%s\t%s\tDEFAULT\t %s\t %s\t\n", i, table[i].st_value, table[i].st_size, type(table[i].st_info & 0xf), binding(table[i].st_info >> 4), res, getName(lecteur, tab[atoi(res)].sh_name + table[i].st_name));
+            fprintf(stdout, "%d:\t%.8x %d\t%s\t%s\tDEFAULT\t %s\t %s\t\n", i, symbol_table[i].st_value, symbol_table[i].st_size, getStType(symbol_table[i].st_info & 0xf), getBinding(symbol_table[i].st_info >> 4), res, getName(lecteur, section_header_tab[atoi(res)].sh_name));
 
         }
         
@@ -129,13 +127,12 @@ void afficherSymbol(ELF_Symbol *table, int taille, lecteur *lecteur, Elf32_Secti
 }
 
 
-//-------------------- SECTION HEADER ---------------------------------
+//---------------------------------- SECTION HEADER -------------------------------------------
 
 
 char* getShType(unsigned int type){
 
     switch(type){
-
         case SHT_NULL : return "SHT_NULL"; break;
         case SHT_PROGBITS : return "SHT_PROGBITS"; break;
         case SHT_SYMTAB : return "SHT_SYMTAB"; break;
@@ -219,13 +216,12 @@ void afficher_sh_flags(unsigned int flags){
 
 }
 
-void afficher_section_table(Elf32_Section_Header *tab, uint16_t nb, lecteur *lecteur){
-    lecteur->adr=0;
+void afficher_section_table(lecteur *lecteur, ELF_Header *elf_header, Elf32_Section_Header *tab){
     printf("Section Headers:\n");
     printf("  [Nr] \t          Name \t         Type \t         Addr \t          Off \t Size \tES \tFlg \tLk\tInf \tAl \n");
     int i = 0;
 
-    while(i<nb){
+    while(i < elf_header->e_shnum){
         
         printf("  [%d]%20s\t%s\t%.8hx\t%.6hx\t%06x\t%02x\t", i, getName(lecteur, tab[i].sh_name), getShType(tab[i].sh_type), tab[i].sh_addr, tab[i].sh_offset, tab[i].sh_size, tab[i].sh_entsize);
         afficher_sh_flags(tab[i].sh_flags);
@@ -240,8 +236,7 @@ void afficher_section_table(Elf32_Section_Header *tab, uint16_t nb, lecteur *lec
 
 
 void afficher_section(Elf32_Section_Header *tab , int nb ,lecteur *lecteur){
-    lecteur->adr=0;
-    
+
     printf("Affichage de la section numero %d, de nom", nb);
     char * name = getName(lecteur, tab[nb].sh_name);
     printf(" %s \n", name);
@@ -272,7 +267,7 @@ void afficher_section(Elf32_Section_Header *tab , int nb ,lecteur *lecteur){
 
 
 
-//------------------------------------AFFICHAGE ELF HEADER---------------------------
+//------------------------------------ AFFICHAGE ELF HEADER ---------------------------
 
 
 char *getClass(unsigned char c){
@@ -333,11 +328,11 @@ char *getVersion(unsigned char c){
 }
 
 
-//TODO MAXIME
 char *getOSABI(unsigned char c){
     char *OSABI="UNIX - System V";
     return OSABI;
 }
+
 
 char *getType(uint16_t c){
     char *type;
@@ -373,43 +368,6 @@ char *getType(uint16_t c){
 
 char *getMachine(uint16_t c){
     char *machine ="ARM";
-    // switch (c) {
-    //     case EM_NONE: 
-    //         machine = "No machine";
-    //         break;
-    //     case EM_M32: 
-    //         machine = "AT&T WE 32100";
-    //         break;
-    //     case EM_SPARC: 
-    //         machine = "SPARC";
-    //         break;
-    //     case EM_386: 
-    //         machine = "Intel Architecture";
-    //         break;
-    //     case EM_68K: 
-    //         machine = "Motorola 68000";
-    //         break;
-    //     case EM_88K: 
-    //         machine = "Motorola 88000";
-    //         break;
-    //     case EM_860: 
-    //         machine = "Intel 80860";
-    //         break;
-    //     case EM_MIPS: 
-    //         machine = "MIPS RS3000 Big-Endian";
-    //         break;
-    //     case EM_MIPS_RS4_BE: 
-    //         machine = "MIPS RS4000 Big-Endian";
-    //         break;
-    //     case RESERVED: 
-    //         machine = "Reserved for future use";
-    //         break;
-    //     default:
-    //         machine = "Machine non répertoriée";
-    //         //fprintf(stderr, "ERREUR: Valeur de machine invalide: e_type = 0x%.4hx\n", c);
-    //         //exit(1);
-    //         break;
-    // }
     return machine;
 }
 
@@ -452,7 +410,7 @@ void afficher_header(ELF_Header *Header){
 }
 
 
-//-------------------------------------------------------------------------------------------------------
+//--------------------------------- RELOCATION TABLE -------------------------------------------------
 
 void afficherRelocations(Elf32_Section_Header *Rel_section_tab ,ELF_Rel *ELF_tab, ELF_Symbol *sym, int nb_ELF, int nb_section, lecteur *lecteur){
     lecteur->adr=0;

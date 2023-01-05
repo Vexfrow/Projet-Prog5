@@ -22,6 +22,7 @@ char* getName(lecteur *lecteur, unsigned int address){
 
 
  //-----------------------------HEADER------------------------------------
+ 
 void remplirMagic(lecteur *lecteur, ELF_Header *Header, int taille){
     for(int i = 0; i < taille; i++){
         Header->e_ident[i] = lecture1octet(lecteur);
@@ -61,7 +62,7 @@ Elf32_Section_Header *init_section_header(lecteur *lecteur, ELF_Header *elf_head
     lecteur->adr=0;
     Elf32_Section_Header *section_header = malloc(sizeof(Elf32_Section_Header)*elf_header->e_shnum);
     if(section_header == NULL){
-        fprintf(stderr, "ERREUR: Pas assez d'espace mémoire");
+        fprintf(stderr, "ERREUR: Pas assez d'espace mémoire pour Section Header");
         exit(1);
     }
 
@@ -99,7 +100,7 @@ Elf32_Section_Header *init_section_header(lecteur *lecteur, ELF_Header *elf_head
 //--------------------SYMBOL TABLE ---------------------------------
 
 
-ELF_Symbol *remplirSymbol(lecteur *lecteur, ELF_Symbol *table, int taille){
+ELF_Symbol *remplirTableSymbol(lecteur *lecteur, ELF_Symbol *table, int taille){
     for(int i = 0; i < taille; i++){
         table[i].st_name = lecture4octet(lecteur);
         table[i].st_value = lecture4octet(lecteur);
@@ -112,40 +113,34 @@ ELF_Symbol *remplirSymbol(lecteur *lecteur, ELF_Symbol *table, int taille){
 }
 
 
-ELF_Symbol *init_symbol_table(lecteur *lecteur, Elf32_Section_Header *sectionHead, int tailleSectionTable){
-    if(sectionHead == NULL){
-        fprintf(stderr, "Pas de table des sections(tableSymbol)");
-        exit(3);
-    }
-    int i = 0;
-    while( i < tailleSectionTable && sectionHead[i].sh_type != SHT_SYMTAB){
-        i++;
-    }
-    int taille = tailleTableSymbol(sectionHead, tailleSectionTable);
+ELF_Symbol *init_symbol_table(lecteur *lecteur, ELF_Header *elf_header, Elf32_Section_Header *sectionHeader){
+
+    int indexSymbolTableSection = getIndexSymbolTableSection(elf_header, sectionHeader);
+    int taille = sectionHeader[indexSymbolTableSection].sh_size / 16;
+
     ELF_Symbol *table = malloc(sizeof(ELF_Symbol)*taille);
     if(table == NULL){
         fprintf(stderr, "Pas assez de place mémoire");
         exit(1);
     }
-    lecteur->adr= sectionHead[i].sh_offset;
-    remplirSymbol(lecteur, table, taille);
+
+    lecteur->adr= sectionHeader[indexSymbolTableSection].sh_offset;
+    remplirTableSymbol(lecteur, table, taille);
     return table;
 }
 
 
-int tailleTableSymbol(Elf32_Section_Header *sectionHead, int tailleSectionTable){
-    if(sectionHead == NULL){
-        fprintf(stderr, "Pas de table des sections (tailleTableSymbol)");
-        exit(3);
-    }
+int getIndexSymbolTableSection(ELF_Header *elf_header, Elf32_Section_Header *sectionHead){
     int i = 0;
-    while( i < tailleSectionTable && sectionHead[i].sh_type != SHT_SYMTAB){
+    while( i < elf_header->e_shnum && sectionHead[i].sh_type != SHT_SYMTAB){
         i++;
     }
-    return sectionHead[i].sh_size / 16;
+    if(i >= elf_header->e_shnum){
+        fprintf(stderr, "ERREUR : Absence de symbol table");
+        exit(1);
+    }
+    return i;
 }
-
-
 
 
 //--------------------- RELOCATION TABLE -----------------------------------
