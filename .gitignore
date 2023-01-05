@@ -3,3 +3,7 @@
 .gitignore
 #ignore le main executable
 main
+#ignore les executables
+*.exe
+
+/.vscode

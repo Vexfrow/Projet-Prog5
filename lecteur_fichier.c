@@ -23,11 +23,12 @@ char* getName(lecteur *lecteur, unsigned int address){
 void remplirMagic(lecteur *lecteur, ELF_Header *Header, int taille){
     for(int i = 0; i < taille; i++){
         Header->e_ident[i] = lecture1octet(lecteur);
+        fprintf(stderr, "%d\n", Header->e_ident[i]);
     }
 }
 
 ELF_Header *init(lecteur *lect){
-    lect->adr=0;
+    
     ELF_Header *elf = malloc(sizeof(ELF_Header));
     uint32_t (*l4o)(lecteur*);
     uint16_t (*l2o)(lecteur*);
@@ -35,8 +36,9 @@ ELF_Header *init(lecteur *lect){
         fprintf(stderr, "ERREUR: Pas assez d'espace mémoire");
         exit(1);
     }
-
+    lect->adr=0;
     remplirMagic(lect, elf, EI_NIDENT);
+
     
     if(elf->e_ident[5] == 1){
         //Little Endian
@@ -48,7 +50,7 @@ ELF_Header *init(lecteur *lect){
         l2o = bigEndianLecture2octet;
     }else{
         //Cas d'erreur
-        fprintf(stderr, "Le format de donnée est invalide");
+        fprintf(stderr, "Le format de donnée est invalide dans le header\n");
         exit(1);
     }
 
