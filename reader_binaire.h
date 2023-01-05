@@ -18,9 +18,9 @@ unsigned char lecture1octet(lecteur *lecteur);
 uint16_t lecture2octet(lecteur *lecteur);
 uint32_t lecture4octet(lecteur *lecteur);
 
-uint16_t littleEndianLecture2octet(FILE *fichier);
+uint16_t bigEndianLecture2octet(lecteur *lecteur);
 
-int littleEndianLecture4octet(FILE *fichier);
+uint32_t bigEndianLecture4octet(lecteur *lecteur);
 
 
 #endif 

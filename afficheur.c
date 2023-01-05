@@ -27,7 +27,6 @@ char *binding(char bind){
     return NULL;
 }
 
-
 char *type(char vis){
     switch(vis){
         case 0:
@@ -59,7 +58,6 @@ char *type(char vis){
     return NULL;
 
 }
-
 
 char *calculNdx(uint16_t ndx, int taille ){
     if(ndx > 0 && ndx <= taille){
@@ -94,7 +92,6 @@ char *calculNdx(uint16_t ndx, int taille ){
 
         }
 }
-
 
 //table[i].st_info >> 4
 
@@ -237,8 +234,6 @@ void afficher_section_table(Elf32_Section_Header *tab, uint16_t nb, lecteur *lec
     printf("\n\n");
 }
 
-
-
 void afficher_section(Elf32_Section_Header *tab , int nb ,lecteur *lecteur){
     lecteur->adr=0;
     
@@ -270,10 +265,7 @@ void afficher_section(Elf32_Section_Header *tab , int nb ,lecteur *lecteur){
     printf("\n");
 }
 
-
-
 //------------------------------------AFFICHAGE ELF HEADER---------------------------
-
 
 char *getClass(unsigned char c){
     char *class;
@@ -413,16 +405,12 @@ char *getMachine(uint16_t c){
     return machine;
 }
 
-
-
 void afficherMagic(ELF_Header *Header, int taille){
     for(int i =0; i < taille; i++){
         printf("%.2hx ", Header->e_ident[i]);
     }
     printf("\n");
 }
-
-
 
 void afficher_header(ELF_Header *Header){
     printf("ELF Header:\n");
@@ -450,7 +438,6 @@ void afficher_header(ELF_Header *Header){
     printf("  Number of section headers:         %d\n", Header->e_shnum);
     printf("  Section header string table index: %d\n\n", Header->e_shstrndx);
 }
-
 
 //-------------------------------------------------------------------------------------------------------
 

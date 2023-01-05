@@ -66,11 +66,11 @@ ELF_Header *init (lecteur *lecteur);
 
 void init_section_header(lecteur *lecteur, uint16_t nb, unsigned int adrStart, Elf32_Section_Header *tab, unsigned int adrStartString);
 
-void init_relocationTab(Elf32_Section_Header *Rel_section_tab,  ELF_Rel *ELF_tab, int nb, lecteur *lecteur);
+void init_relocationTab(Elf32_Section_Header *Rel_section_tab,  ELF_Rel *ELF_tab, int nb, lecteur *lect );
 
 ELF_Symbol *tableSymbol(lecteur *lecteur, Elf32_Section_Header *sectionHead, int tailleSectionTable);
 
-ELF_Symbol *remplirSymbol(lecteur *lecteur, ELF_Symbol *table, int taille);
+ELF_Symbol *remplirSymbol(lecteur *lect, ELF_Symbol *table, int taille, uint32_t (*l4o)(lecteur*), uint16_t (*l2o)(lecteur*));
 
 int tailleTableSymbol(Elf32_Section_Header *sectionHead, int tailleSectionTable);
 
