@@ -2,12 +2,12 @@
 #include <stdlib.h>
 
 
-lecteur *init_lecture(FILE *fichier){
-    lecteur *lecteur;
+Lecteur *init_lecture(FILE *fichier){
+    Lecteur *lecteur = malloc(sizeof(Lecteur));
     fseek(fichier, 0, SEEK_END);
     lecteur->size = ftell(fichier);
     lecteur->adr = 0;
-    lecteur->fichier=malloc(sizeof(char)*lecteur->size);
+    lecteur->fichier = malloc(sizeof(char)*lecteur->size);
     if(!lecteur->fichier){
         free(lecteur->fichier);
         printf("Erreur d'initialisation du malloc fichier");
@@ -19,7 +19,7 @@ lecteur *init_lecture(FILE *fichier){
 }
 
 
-unsigned char lecture1octet(lecteur *lecteur){
+unsigned char lecture1octet(Lecteur *lecteur){
     unsigned char i =0;
     if(lecteur->adr < lecteur->size){
         i = lecteur->fichier[lecteur->adr];
@@ -28,7 +28,7 @@ unsigned char lecture1octet(lecteur *lecteur){
     return i;
 }
 
-uint16_t lecture2octet(lecteur *lecteur){
+uint16_t lecture2octet(Lecteur *lecteur){
     uint16_t octet = 0;
     uint16_t tampon =0;
     if(lecteur->adr < lecteur->size-1){
@@ -41,7 +41,7 @@ uint16_t lecture2octet(lecteur *lecteur){
     return octet;   
 }
 
-uint32_t lecture4octet(lecteur *lecteur){
+uint32_t lecture4octet(Lecteur *lecteur){
     uint32_t octet = 0;
     uint32_t tampon =0;
     if(lecteur->adr < lecteur->size-3){

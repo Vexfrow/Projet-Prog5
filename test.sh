@@ -106,9 +106,50 @@ testSectionUnique(){
             echo "[SECTION UNIQUE - $j ] OK pour $1"
         else
             echo "[SECTION UNIQUE - $j ] ECHEC pour $1"
+            echo "Ligne attendu :"
+            echo `cat resultatAttendu`
+            echo ""
+            echo "Ligne Obtenu"
+            echo `cat resultatObtenu`
             exit
         fi
     done
+ 
+}
+
+testRelocationTable(){
+
+    arm-none-eabi-readelf -r -W $1 | tail -n +2 | sed -r 's/ //g' | sed -r 's/\t//g' > resultatAttendu   
+    ./main -r $1 | head -n -1 | sed -r 's/ //g' | sed -r 's/\t//g'> resultatObtenu
+
+    i=1
+    while read -r ligneA;
+    do
+        ligneO=`sed -n "$i"p resultatObtenu`
+
+        if [ "$ligneA" != "$ligneO" ]
+        then
+            echo "[RELOCATION TABLE] ECHEC pour $1 à la ligne $i "
+            echo ""
+            echo "Ligne attendu :"
+            echo "$ligneA"
+            echo ""
+            echo "Ligne Obtenu"
+            echo "$ligneO"
+            exit
+        fi
+
+        ((i+=1))
+    done < resultatAttendu
+
+
+    if [[ `sed -n "$i"p resultatObtenu | wc -w` -eq 0 ]]
+    then 
+        echo "[RELOCATION TABLE] OK pour $1"
+    else
+        echo "[RELOCATION TABLE] ECHEC pour $1 : Nombre de lignes différent"
+        exit
+    fi
  
 }
 
@@ -121,6 +162,7 @@ do
     testSectionHeader $file
     testSectionUnique $file
     testSymbolTable $file
+    testRelocationTable $file
     echo "--------------------------------------------------------------------------------------"
     
 done

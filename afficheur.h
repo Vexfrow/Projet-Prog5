@@ -8,7 +8,7 @@
 
 //------------------------- SYMBOL TABLE -------------------------------------------
 
-void afficherSymbol(lecteur *lecteur, ELF_Header *elf_header, Elf32_Section_Header *section_header_tab, ELF_Symbol *symbol_table);
+void afficherSymbol(Lecteur *lecteur, ELF_Header *elf_header, Elf32_Section_Header *section_header_tab, ELF_Symbol *symbol_table);
 
 char *getBinding(char bind);
 
@@ -25,11 +25,10 @@ char* getShType(unsigned int type);
 void afficher_sh_flags(unsigned int flags);
 
 //Permet d'afficher la table des sections 
-void afficher_section_table(lecteur *lecteur, ELF_Header *Header, Elf32_Section_Header *tab);
-
+void afficher_section_table(Lecteur *lecteur, ELF_Header *Header, Elf32_Section_Header *tab);
 
 //Permet d'afficher le contenue d'une fonction à partir de son idex dans la table des sections 
-void afficher_section(Elf32_Section_Header *tab , int nb ,lecteur *lecteur);
+void afficher_section(Lecteur *lecteur, Elf32_Section_Header *section_header_tab, int indexSection);
 
 //------------------------- HEADER -------------------------------------------
 
@@ -44,7 +43,6 @@ char *getDataEncoding(unsigned char c);
 //Permet de récuperer la version du fichier
 char *getVersion(unsigned char c);
 
-//TODO MAXIME
 //Permet de récuperer la manière dont sont encodées les données
 char *getOSABI(unsigned char c);
 
@@ -59,7 +57,7 @@ void afficher_header(ELF_Header *Header);
 
 //------------------------- RELOCATION TABLE -------------------------------------------
 
-void afficherRelocations(Elf32_Section_Header *Rel_section_tab ,ELF_Rel *ELF_tab, ELF_Symbol *sym, int nb_ELF, int nb_section, lecteur *lecteur);
+void afficherRelocations(Lecteur *lecteur, ELF_Header *elf_header, Elf32_Section_Header *Rel_section_tab , ELF_Symbol *sym, ELF_Rel *ELF_tab);
 
 void affichertypereloc(unsigned char t);
 

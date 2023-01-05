@@ -104,24 +104,16 @@ char *calculNdx(uint16_t ndx, int taille ){
 
 //table[i].st_info & 0xf
 
-void afficherSymbol(lecteur *lecteur, ELF_Header *elf_header, Elf32_Section_Header *section_header_tab, ELF_Symbol *symbol_table){
+void afficherSymbol(Lecteur *lecteur, ELF_Header *elf_header, Elf32_Section_Header *section_header_tab, ELF_Symbol *symbol_table){
     fprintf(stdout, "Num :\tValue \tSize\tType\tBind \tVis \t Ndx\t Name\n");
 
 
     int indexSymbolTableSection = getIndexSymbolTableSection(elf_header, section_header_tab);
-    int adressSymbolStringTable = section_header_tab[section_header_tab[indexSymbolTableSection].sh_link].sh_offset;
     int taille = section_header_tab[indexSymbolTableSection].sh_size / 16;
 
     for(int i =0; i < taille; i++){
         char* res = calculNdx(symbol_table[i].st_shndx, elf_header->e_shnum);
-
-        if((strcmp(getStType(symbol_table[i].st_info & 0xf), "SECTION") )) {
-            fprintf(stdout, "%d:\t%.8x %d\t%s\t%s\tDEFAULT\t %s\t %s\t\n", i, symbol_table[i].st_value, symbol_table[i].st_size, getStType(symbol_table[i].st_info & 0xf), getBinding(symbol_table[i].st_info >> 4), res, getName(lecteur,adressSymbolStringTable + symbol_table[i].st_name));
-        }else{
-            fprintf(stdout, "%d:\t%.8x %d\t%s\t%s\tDEFAULT\t %s\t %s\t\n", i, symbol_table[i].st_value, symbol_table[i].st_size, getStType(symbol_table[i].st_info & 0xf), getBinding(symbol_table[i].st_info >> 4), res, getName(lecteur, section_header_tab[atoi(res)].sh_name));
-
-        }
-        
+        fprintf(stdout, "%d:\t%.8x %d\t%s\t%s\tDEFAULT\t %s\t %s\t\n", i, symbol_table[i].st_value, symbol_table[i].st_size, getStType(symbol_table[i].st_info & 0xf), getBinding(symbol_table[i].st_info >> 4), res, getName(lecteur, symbol_table[i].st_name));
     }      
     
 }
@@ -216,7 +208,7 @@ void afficher_sh_flags(unsigned int flags){
 
 }
 
-void afficher_section_table(lecteur *lecteur, ELF_Header *elf_header, Elf32_Section_Header *tab){
+void afficher_section_table(Lecteur *lecteur, ELF_Header *elf_header, Elf32_Section_Header *tab){
     printf("Section Headers:\n");
     printf("  [Nr] \t          Name \t         Type \t         Addr \t          Off \t Size \tES \tFlg \tLk\tInf \tAl \n");
     int i = 0;
@@ -235,27 +227,24 @@ void afficher_section_table(lecteur *lecteur, ELF_Header *elf_header, Elf32_Sect
 
 
 
-void afficher_section(Elf32_Section_Header *tab , int nb ,lecteur *lecteur){
+void afficher_section(Lecteur *lecteur, Elf32_Section_Header *section_header_tab, int indexSection){
 
-    printf("Affichage de la section numero %d, de nom", nb);
-    char * name = getName(lecteur, tab[nb].sh_name);
-    printf(" %s \n", name);
+    printf("Affichage de la section numero %d, de nom %s\n", indexSection, getName(lecteur, section_header_tab[indexSection].sh_name));
 
-    int size = tab[nb].sh_size;
+    int size = section_header_tab[indexSection].sh_size;
     if(!size){
         printf("Il n'y a pas de data dans cette section ");
     }else{
-        lecteur->adr =tab[nb].sh_addr + tab[nb].sh_offset;
+        lecteur->adr = section_header_tab[indexSection].sh_offset;
         int i = 0;
         unsigned char octet =0;
         while(i<size){
-            if( !(i%4) && i){
+            if( !(i%4) && i)
                 printf(" ");
-            }
-            if(!(i%16)){
-                
+            
+            if(!(i%16))
                 printf("\n 0x%.8hx ",i);
-            }
+            
             octet = lecture1octet(lecteur);
             printf("%.2hx",octet);
             i++;
@@ -412,31 +401,37 @@ void afficher_header(ELF_Header *Header){
 
 //--------------------------------- RELOCATION TABLE -------------------------------------------------
 
-void afficherRelocations(Elf32_Section_Header *Rel_section_tab ,ELF_Rel *ELF_tab, ELF_Symbol *sym, int nb_ELF, int nb_section, lecteur *lecteur){
+void afficherRelocations(Lecteur *lecteur, ELF_Header *elf_header, Elf32_Section_Header *section_header_table , ELF_Symbol *symbol_table, ELF_Rel *relocation_table){
     lecteur->adr=0;
     int i =0;
     int j =0;
     int nb=0;
 
-    
 
-    while(j<nb_section){
-        i=0;
-        printf("Relocation section '%s' at offset 0x%hx contains %d entries: \n", getName(lecteur, Rel_section_tab[j].sh_name), Rel_section_tab[j].sh_offset,(Rel_section_tab[j].sh_size/8) );
-        printf("Offset \t Info \t \t Type \t \t Sym.Value \t Sym. Name\n");
-        while(i < (Rel_section_tab[j].sh_size/8)){
-            printf("%.8hx ",ELF_tab[nb].r_offset);
-            printf("%.8hx\t",ELF_tab[nb].r_info);
-            unsigned char type = ELF_tab[nb].r_info;
-            affichertypereloc(type);
-            int value = ELF_tab[nb].r_info >> 8;
-            printf("%.8x",sym[value].st_value);
-            i++;
-            nb++;
+    while(j < elf_header->e_shnum){
+        if(section_header_table[j].sh_type == 9){
+            i=0;
+            if(section_header_table[j].sh_size/8 == 1)
+                printf("Relocation section '%s' at offset 0x%hx contains %d entry:\n", getName(lecteur, section_header_table[j].sh_name), section_header_table[j].sh_offset,(section_header_table[j].sh_size/8) );
+            else
+                printf("Relocation section '%s' at offset 0x%hx contains %d entries:\n", getName(lecteur, section_header_table[j].sh_name), section_header_table[j].sh_offset,(section_header_table[j].sh_size/8) );
+            printf("Offset \t Info \t \t Type \t \t Sym.Value \t Symbol's Name\n");
+            while(i < (section_header_table[j].sh_size/8)){
+                printf("%.8hx ",relocation_table[nb].r_offset);
+                printf("%.8hx\t",relocation_table[nb].r_info);
+                unsigned char type = relocation_table[nb].r_info;
+                affichertypereloc(type);
+                int value = relocation_table[nb].r_info >> 8;
+                printf("%.8x\t",symbol_table[value].st_value);
+                printf("%s\t",getName(lecteur, symbol_table[value].st_name));
+
+                i++;
+                nb++;
+                printf("\n");
+            }
             printf("\n");
         }
         j++;
-        printf("\n");
     }
 }
 
