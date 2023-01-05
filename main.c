@@ -19,14 +19,13 @@ void usage() {
 
 void afficherRelocationsInit(lecteur *lecteur){
 
-    ELF_Header *header = init(lecteur);
-    Elf32_Section_Header *Section_header_tab = malloc(sizeof(Elf32_Section_Header)*header->e_shnum);
-    init_section_header(lecteur, header->e_shnum, header->e_shoff, Section_header_tab, header->e_shstrndx);
-    ELF_Symbol *sym = tableSymbol(lecteur, Section_header_tab, header->e_shnum);
+    ELF_Header *elf_header = init_header(lecteur);
+    Elf32_Section_Header *Section_header_tab = init_section_header(lecteur, elf_header);
+    ELF_Symbol *sym = init_symbol_table(lecteur, Section_header_tab, elf_header->e_shnum);
     int i = 0;
     int nb_section =0;
     int nb_ELF =0;
-    while( i< header->e_shnum){
+    while( i< elf_header->e_shnum){
         if(Section_header_tab[i].sh_type == 9){
             nb_section++;
             nb_ELF = nb_ELF + (Section_header_tab[i].sh_size/8);
@@ -36,7 +35,7 @@ void afficherRelocationsInit(lecteur *lecteur){
     Elf32_Section_Header *Rel_section_tab = malloc(sizeof(Elf32_Section_Header)*nb_section);
     int j=0;
     i=0;
-    while(i< header->e_shnum){
+    while(i< elf_header->e_shnum){
         if(Section_header_tab[i].sh_type == 9){
             Rel_section_tab[j].sh_name = Section_header_tab[i].sh_name;
             Rel_section_tab[j].sh_type = Section_header_tab[i].sh_type;
@@ -118,11 +117,12 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "Il ne doit y avoir que 2 ou 3 arguments (dans le cas où l'option choisi est 'x')\n");
         exit(1);
     }
-    lecteur *lecteur =init_lecture(fichier);
-    ELF_Header *elf_header = init(lecteur);
-    Elf32_Section_Header *Section_header_tab = malloc(sizeof(Elf32_Section_Header)*elf_header->e_shnum);
-    init_section_header(lecteur, elf_header->e_shnum, elf_header->e_shoff, Section_header_tab, elf_header->e_shstrndx);
-    ELF_Symbol *sym=tableSymbol(lecteur, Section_header_tab, elf_header->e_shnum);
+
+    //On inialise toute les structures necessaires
+    lecteur *lecteur = init_lecture(fichier);
+    ELF_Header *elf_header = init_header(lecteur);
+    Elf32_Section_Header *Section_header_tab = init_section_header(lecteur, elf_header);
+    ELF_Symbol *sym = init_symbol_table(lecteur, Section_header_tab, elf_header->e_shnum);
 
     if(all){
         afficher_header(elf_header);

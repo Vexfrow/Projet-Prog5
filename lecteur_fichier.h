@@ -55,24 +55,31 @@ typedef struct {
 
 
 
-// -----------------------------------------------
+// ----------------------------------------------------------------------------------------
 
 char* getName(lecteur *lecteur, unsigned int address);
+// ----------------------------------------------------------------------------------------
 
 //Permet de remplir le "Magic number"
 void remplirMagic(lecteur *lecteur, ELF_Header *Header, int taille);
 
-ELF_Header *init (lecteur *lecteur);
+ELF_Header *init_header(lecteur *lecteur);
 
-void init_section_header(lecteur *lecteur, uint16_t nb, unsigned int adrStart, Elf32_Section_Header *tab, unsigned int adrStartString);
+// ----------------------------------------------------------------------------------------
+
+Elf32_Section_Header *init_section_header(lecteur *lecteur, ELF_Header *elf_header);
+
+// ----------------------------------------------------------------------------------------
 
 void init_relocationTab(Elf32_Section_Header *Rel_section_tab,  ELF_Rel *ELF_tab, int nb, lecteur *lecteur);
 
-ELF_Symbol *tableSymbol(lecteur *lecteur, Elf32_Section_Header *sectionHead, int tailleSectionTable);
+// ----------------------------------------------------------------------------------------
+
+ELF_Symbol *init_symbol_table(lecteur *lecteur, Elf32_Section_Header *sectionHead, int tailleSectionTable);
 
 ELF_Symbol *remplirSymbol(lecteur *lecteur, ELF_Symbol *table, int taille);
 
 int tailleTableSymbol(Elf32_Section_Header *sectionHead, int tailleSectionTable);
 
-
+// ----------------------------------------------------------------------------------------
 #endif

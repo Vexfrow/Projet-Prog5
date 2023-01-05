@@ -20,13 +20,15 @@ char* getName(lecteur *lecteur, unsigned int address){
     return res;
 }
 
+
+ //-----------------------------HEADER------------------------------------
 void remplirMagic(lecteur *lecteur, ELF_Header *Header, int taille){
     for(int i = 0; i < taille; i++){
         Header->e_ident[i] = lecture1octet(lecteur);
     }
 }
 
-ELF_Header *init(lecteur *lecteur){
+ELF_Header *init_header(lecteur *lecteur){
     lecteur->adr=0;
     ELF_Header *elf = malloc(sizeof(ELF_Header));
     if(elf == NULL){
@@ -52,48 +54,49 @@ ELF_Header *init(lecteur *lecteur){
 }
 
 
-void init_section_header(lecteur *lecteur, uint16_t nb, unsigned int adrStart, Elf32_Section_Header *tab, unsigned int indexStringTable){
+
+//-----------------------SECTION HEADER ------------------------------------
+
+Elf32_Section_Header *init_section_header(lecteur *lecteur, ELF_Header *elf_header){
     lecteur->adr=0;
+    Elf32_Section_Header *section_header = malloc(sizeof(Elf32_Section_Header)*elf_header->e_shnum);
+    if(section_header == NULL){
+        fprintf(stderr, "ERREUR: Pas assez d'espace mémoire");
+        exit(1);
+    }
+
     int i = 0;
     unsigned int adressStringTable;
-    while ( i < nb){
-        lecteur->adr = adrStart +40*(i);
-        int val = lecture4octet(lecteur);
-        tab[i].sh_name = val;
-        val = lecture4octet(lecteur);
-        tab[i].sh_type = val;
-        val = lecture4octet(lecteur);
-        tab[i].sh_flags = val;
-        val = lecture4octet(lecteur);
-        tab[i].sh_addr = val;
-        val = lecture4octet(lecteur);
-        tab[i].sh_offset = val;
-        val = lecture4octet(lecteur);
-        tab[i].sh_size = val;
-        val = lecture4octet(lecteur);
-        tab[i].sh_link = val;
-        val = lecture4octet(lecteur);
-        tab[i].sh_info = val;
-        val = lecture4octet(lecteur);
-        tab[i].sh_addralign = val;
-        val = lecture4octet(lecteur);
-        tab[i].sh_entsize = val;
+    while ( i < elf_header->e_shnum){
+        lecteur->adr = elf_header->e_shoff + elf_header->e_shentsize*(i);
+        section_header[i].sh_name = lecture4octet(lecteur);;
+        section_header[i].sh_type = lecture4octet(lecteur);;
+        section_header[i].sh_flags = lecture4octet(lecteur);
+        section_header[i].sh_addr = lecture4octet(lecteur);
+        section_header[i].sh_offset = lecture4octet(lecteur);
+        section_header[i].sh_size = lecture4octet(lecteur);
+        section_header[i].sh_link = lecture4octet(lecteur);
+        section_header[i].sh_info = lecture4octet(lecteur);
+        section_header[i].sh_addralign = lecture4octet(lecteur);
+        section_header[i].sh_entsize = lecture4octet(lecteur);
 
-        if(i == indexStringTable){
-            adressStringTable = tab[i].sh_addr+tab[i].sh_offset;
+        if(i == elf_header->e_shstrndx){
+            adressStringTable = section_header[i].sh_addr+section_header[i].sh_offset;
         }
-        i++;   
-        
-          
+        i++;    
     }
     
     
-    for(i = 0; i < nb; i++){
-        tab[i].sh_name = adressStringTable+tab[i].sh_name;
+    for(i = 0; i < elf_header->e_shnum; i++){
+        section_header[i].sh_name = adressStringTable+section_header[i].sh_name;
     }
+
+    return section_header;
 
 }
 
+
+//--------------------SYMBOL TABLE ---------------------------------
 
 
 ELF_Symbol *remplirSymbol(lecteur *lecteur, ELF_Symbol *table, int taille){
@@ -109,7 +112,7 @@ ELF_Symbol *remplirSymbol(lecteur *lecteur, ELF_Symbol *table, int taille){
 }
 
 
-ELF_Symbol *tableSymbol(lecteur *lecteur, Elf32_Section_Header *sectionHead, int tailleSectionTable){
+ELF_Symbol *init_symbol_table(lecteur *lecteur, Elf32_Section_Header *sectionHead, int tailleSectionTable){
     if(sectionHead == NULL){
         fprintf(stderr, "Pas de table des sections(tableSymbol)");
         exit(3);
@@ -141,6 +144,11 @@ int tailleTableSymbol(Elf32_Section_Header *sectionHead, int tailleSectionTable)
     }
     return sectionHead[i].sh_size / 16;
 }
+
+
+
+
+//--------------------- RELOCATION TABLE -----------------------------------
 
 void init_relocationTab(Elf32_Section_Header *Rel_section_tab,  ELF_Rel *ELF_tab, int nb, lecteur *lecteur){
     lecteur->adr=0;
