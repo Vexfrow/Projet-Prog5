@@ -1,5 +1,16 @@
-#Ne pas inclure les .o
+##Les .o
 *.o
 
-#ignore le main executable
+##Le .gitignore
+.gitignore
+
+
+##Les fichiers issus des tests
+resultatAttendu
+resultatObtenu
+
+
+##Les exécutables
+affichageElf
 main
+

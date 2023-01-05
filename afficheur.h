@@ -5,36 +5,34 @@
 #include <stdlib.h>
 #include <elf.h>
 
-void afficherMagic(ELF_Header *Header, int taille);
 
-void afficherSymbol(ELF_Symbol *table, int taille, FILE *fichier, Elf32_Section_Header *tab);
+//------------------------- SYMBOL TABLE -------------------------------------------
 
-void afficher_sh_name(char* name);
+void afficherSymbol(Lecteur *lecteur, ELF_Header *elf_header, Elf32_Section_Header *section_header_tab, ELF_Symbol *symbol_table);
 
-void afficher_sh_type(unsigned int type);
+char *getBinding(char bind);
 
-void afficher_sh_addr(unsigned int addr);
+char *getStType(char vis);
 
-void afficher_sh_offset(unsigned int offset);
+char *calculNdx(uint16_t ndx, int taille );
 
-void afficher_sh_size(unsigned int size);
+//------------------------- SECTION HEADER  -------------------------------------------
 
-void afficher_sh_link(unsigned int link);
+//Permet de récupèrer le type de la section
+char* getShType(unsigned int type);
 
-void afficher_sh_info(unsigned int info);
-
-void afficher_sh_addralign(unsigned int addralign);
-
-void afficher_sh_entsize(unsigned int entsize);
-
+//Permet d'afficher les flags
 void afficher_sh_flags(unsigned int flags);
 
-void afficher_section(Elf32_Section_Header *tab, uint16_t nb, FILE *fichier);
+//Permet d'afficher la table des sections 
+void afficher_section_table(Lecteur *lecteur, ELF_Header *Header, Elf32_Section_Header *tab);
 
-char* getName(FILE *fichier, unsigned int address);
+//Permet d'afficher le contenue d'une fonction à partir de son idex dans la table des sections 
+void afficher_section(Lecteur *lecteur, Elf32_Section_Header *section_header_tab, int indexSection);
 
+//------------------------- HEADER -------------------------------------------
 
-// Affichage de l'Header: ------------------------
+void afficherMagic(ELF_Header *Header, int taille);
 
 //Permet de récupèrer la classe de l'ELF
 char *getClass(unsigned char c);
@@ -45,21 +43,23 @@ char *getDataEncoding(unsigned char c);
 //Permet de récuperer la version du fichier
 char *getVersion(unsigned char c);
 
-//TODO MAXIME
 //Permet de récuperer la manière dont sont encodées les données
 char *getOSABI(unsigned char c);
 
 //Permet de récuperer le type
 char *getType(uint16_t c);
 
-
-#define EM_MIPS_RS4_BE 10
-#define RESERVED 11 ... 16
 //Permet de récuperer la machine
 char *getMachine(uint16_t c);
 
-// Affiche le header (similaire à 'arm-none-eabi-readelf -a {file_name}.o')
+// Affiche le header (similaire à 'arm-none-eabi-readelf -h {file_name}.o')
 void afficher_header(ELF_Header *Header);
+
+//------------------------- RELOCATION TABLE -------------------------------------------
+
+void afficherRelocations(Lecteur *lecteur, ELF_Header *elf_header, Elf32_Section_Header *Rel_section_tab , ELF_Symbol *sym, ELF_Rel *ELF_tab);
+
+void affichertypereloc(unsigned char t);
 
 
 #endif
