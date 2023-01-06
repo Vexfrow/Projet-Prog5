@@ -3,7 +3,7 @@
 
 ##Le .gitignore
 .gitignore
-
+!tests/*
 
 ##Les fichiers issus des tests
 resultatAttendu
