@@ -1,12 +1,10 @@
 #ifndef __LECTEUR__
 #define __LECTEUR__
-
+#include "reader_binaire.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#define EI_NIDENT 16
-#define SHT_SYMTAB 2
-#define SHT_STRTAB 3
+#include <elf.h>
 
 typedef struct {
     unsigned char e_ident[EI_NIDENT];
@@ -53,21 +51,35 @@ typedef struct {
     unsigned int r_info;
 } ELF_Rel;
 
-// -----------------------------------------------
+
+
+// ----------------------------------------------------------------------------------------
+//Permet de récupèrer un string à partir d'un lecteur et de sa position dans ce dit lecteur
+char* getName(Lecteur *lecteur, unsigned int address);
+// ----------------------------------------------------------------------------------------
 
 //Permet de remplir le "Magic number"
-void remplirMagic(FILE *fichier, ELF_Header *Header, int taille);
+void remplirMagic(Lecteur *lecteur, ELF_Header *Header, int taille);
 
-ELF_Header *init (FILE *fichier);
+ELF_Header *init_header(Lecteur *lecteur);
 
-void init_section_header(FILE *fichier, uint16_t nb, unsigned int adrStart, Elf32_Section_Header *tab, unsigned int adrStartString);
+// ----------------------------------------------------------------------------------------
 
+Elf32_Section_Header *init_section_header(Lecteur *lecteur, ELF_Header *elf_header);
 
-ELF_Symbol *tableSymbol(FILE *fichier, Elf32_Section_Header *sectionHead, int tailleSectionTable);
+// ----------------------------------------------------------------------------------------
 
-ELF_Symbol *remplirSymbol(FILE *fichier, ELF_Symbol *table, int taille);
+ELF_Rel *init_relocation_table(Lecteur *lecteur, ELF_Header *elf_header, Elf32_Section_Header *section_header_tab);
 
-int tailleTableSymbol(Elf32_Section_Header *sectionHead, int tailleSectionTable);
+// ----------------------------------------------------------------------------------------
+
+ELF_Symbol *init_symbol_table(Lecteur *lecteur, ELF_Header *elf_header, Elf32_Section_Header *section_header);
+
+//ELF_Symbol *remplirTableSymbol(Lecteur *lecteur, ELF_Symbol *table, int taille);
+
+int getIndexSymbolTableSection(ELF_Header *elf_header, Elf32_Section_Header *section_header);
+
+// ----------------------------------------------------------------------------------------
 
 
 #endif

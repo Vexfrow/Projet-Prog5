@@ -1,14 +1,25 @@
 #ifndef __READER__
 #define __READER__
 
-
 #include <stdint.h>
 #include <stdio.h>
 
-unsigned char lecture1octet(FILE *fichier);
+typedef struct {
+    unsigned char *fichier;
+    int adr;
+    int size;
+} Lecteur;
 
-uint16_t lecture2octet(FILE *fichier);
+Lecteur *init_lecture(FILE *fichier);
 
-int lecture4octet(FILE *fichier);
+unsigned char lecture1octet(Lecteur *lecteur);
+
+uint16_t lecture2octet(Lecteur *lecteur);
+uint32_t lecture4octet(Lecteur *lecteur);
+
+uint16_t bigEndianLecture2octet(Lecteur *lecteur);
+
+uint32_t bigEndianLecture4octet(Lecteur *lecteur);
+
 
 #endif 

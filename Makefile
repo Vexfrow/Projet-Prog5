@@ -1,6 +1,15 @@
-main: main.o lecteur_fichier.o reader_binaire.o afficheur.o
+CC=gcc
+CFLAGS=-Wall -Werror
+
+
+all: main.o affichageElfMain.o lecteur_fichier.o reader_binaire.o afficheur.o
+	$(CC) -o main main.o lecteur_fichier.o reader_binaire.o afficheur.o
+	$(CC) -o affichageElf affichageElfMain.o lecteur_fichier.o reader_binaire.o afficheur.o
+
 
 main.o: lecteur_fichier.h afficheur.h
+
+affichageElfMain.o: lecteur_fichier.h afficheur.h reader_binaire.o
 
 lecteur_fichier.o: lecteur_fichier.h reader_binaire.h
 

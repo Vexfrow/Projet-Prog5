@@ -75,7 +75,7 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
-    //On inialise toute les structures necessaires
+    //On inialise toutes les structures necessaires
     Lecteur *lecteur = init_lecture(fichier);
     ELF_Header *elf_header = init_header(lecteur);
     Elf32_Section_Header *section_header_tab = init_section_header(lecteur, elf_header);
