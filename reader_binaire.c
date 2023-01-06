@@ -51,3 +51,27 @@ uint32_t lecture4octet(Lecteur *lecteur){
     }
     return octet; 
 }
+
+uint16_t bigEndianLecture2octet(Lecteur *lecteur){
+    uint16_t octet = 0;
+    uint16_t tampon =0;
+    if(lecteur->adr < lecteur->size-1){
+        octet = lecteur->fichier[lecteur->adr];
+        lecteur->adr++;
+        tampon = lecteur->fichier[lecteur->adr];
+        octet = (octet << 8) + tampon;
+        lecteur->adr++;
+    }
+    return octet;   
+}
+
+uint32_t bigEndianLecture4octet(Lecteur *lecteur){
+    uint32_t octet = 0;
+    uint32_t tampon =0;
+    if(lecteur->adr < lecteur->size-3){
+        octet = lecture2octet(lecteur);
+        tampon = lecture2octet(lecteur);
+        octet = (octet << 16)+ tampon;
+    }
+    return octet; 
+}
