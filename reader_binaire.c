@@ -11,10 +11,23 @@ Lecteur *init_lecture(FILE *fichier){
     if(!lecteur->fichier){
         free(lecteur->fichier);
         printf("Erreur d'initialisation du malloc fichier");
+        exit(11);
     }
     fseek(fichier,0, SEEK_SET);
     fread(lecteur->fichier,sizeof(unsigned char),lecteur->size,fichier);
     fclose(fichier);
+    return lecteur;
+}
+Lecteur *init_lecteur(int taille){
+    Lecteur *lecteur = malloc(sizeof(Lecteur));
+    lecteur->adr = 0;
+    lecteur->fichier = malloc(sizeof(char)*taille);
+    if(!lecteur->fichier){
+        free(lecteur->fichier);
+        printf("Erreur d'initialisation du malloc fichier");
+        exit(12);
+    }
+    lecteur->size = taille;
     return lecteur;
 }
 
@@ -50,4 +63,11 @@ uint32_t lecture4octet(Lecteur *lecteur){
         octet = (tampon << 16)+ octet;
     }
     return octet; 
+}
+
+void ecriturele(lecteur *lecteur){
+
+}
+void ecriturebe(lecteur *lecteur){
+    
 }
