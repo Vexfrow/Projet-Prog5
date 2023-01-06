@@ -33,36 +33,72 @@ void remplirMagic(Lecteur *lecteur, ELF_Header *Header, int taille){
     }
 }
 
-ELF_Header *init_header(Lecteur *lecteur){
-    lecteur->adr=0;
+ELF_Header *init_header(Lecteur *lect){
+    
     ELF_Header *elf = malloc(sizeof(ELF_Header));
+    uint32_t (*l4o)(Lecteur*);
+    uint16_t (*l2o)(Lecteur*);
     if(elf == NULL){
         fprintf(stderr, "ERREUR: Pas assez d'espace mémoire");
         exit(1);
     }
-    remplirMagic(lecteur, elf, EI_NIDENT);
-    elf->e_type = lecture2octet(lecteur);
-    elf->e_machine = lecture2octet(lecteur);
-    elf->e_version = lecture4octet(lecteur);
-    elf->e_entry = lecture4octet(lecteur);
-    elf->e_phoff = lecture4octet(lecteur);
-    elf->e_shoff = lecture4octet(lecteur);
-    elf->e_flags = lecture4octet(lecteur); 
-    elf->e_ehsize = lecture2octet(lecteur);
-    elf->e_phentsize = lecture2octet(lecteur); 
-    elf->e_phnum = lecture2octet(lecteur);
-    elf->e_shentsize = lecture2octet(lecteur);
-    elf->e_shnum = lecture2octet(lecteur);
-    elf->e_shstrndx = lecture2octet(lecteur); 
+    lect->adr=0;
+    remplirMagic(lect, elf, EI_NIDENT);
+    if(elf->e_ident[5] == 1){
+        //Little Endian
+        l4o = lecture4octet;
+        l2o = lecture2octet;
+    }else if(elf->e_ident[5] == 2){
+        //Big Endian
+        l4o = bigEndianLecture4octet;
+        l2o = bigEndianLecture2octet;
+
+    }else{
+        //Cas d'erreur
+        fprintf(stderr, "Le format de donnée est invalide dans le header\n");
+        exit(1);
+    }
+
+    elf->e_type = l2o(lect);
+    elf->e_machine = l2o(lect);
+    elf->e_version = l4o(lect);
+    elf->e_entry = l4o(lect);
+    elf->e_phoff = l4o(lect);
+    elf->e_shoff = l4o(lect);
+    elf->e_flags = l4o(lect); 
+    elf->e_ehsize = l2o(lect);
+    elf->e_phentsize = l2o(lect); 
+    elf->e_phnum = l2o(lect);
+    elf->e_shentsize = l2o(lect);
+    elf->e_shnum = l2o(lect);
+    elf->e_shstrndx = l2o(lect); 
 
     return elf;
 }
 
 
 
+
 //-----------------------SECTION HEADER ------------------------------------
 
 Elf32_Section_Header *init_section_header(Lecteur *lecteur, ELF_Header *elf_header){
+
+    lecteur->adr = 5;
+    char endianness = lecture1octet(lecteur);
+    
+    uint32_t (*l4o)(Lecteur*);
+    if(endianness == 1){
+        //Little Endian
+        l4o = lecture4octet;
+    }else if(endianness == 2){
+        //Big Endian
+        l4o = bigEndianLecture4octet;
+    }else{
+        //Cas d'erreur
+        fprintf(stderr, "Le format de donnée est invalide");
+        exit(1);
+    }
+
     lecteur->adr=0;
     Elf32_Section_Header *section_header = malloc(sizeof(Elf32_Section_Header)*elf_header->e_shnum);
     if(section_header == NULL){
@@ -74,16 +110,16 @@ Elf32_Section_Header *init_section_header(Lecteur *lecteur, ELF_Header *elf_head
     unsigned int adressStringTable;
     while ( i < elf_header->e_shnum){
         lecteur->adr = elf_header->e_shoff + elf_header->e_shentsize*(i);
-        section_header[i].sh_name = lecture4octet(lecteur);;
-        section_header[i].sh_type = lecture4octet(lecteur);;
-        section_header[i].sh_flags = lecture4octet(lecteur);
-        section_header[i].sh_addr = lecture4octet(lecteur);
-        section_header[i].sh_offset = lecture4octet(lecteur);
-        section_header[i].sh_size = lecture4octet(lecteur);
-        section_header[i].sh_link = lecture4octet(lecteur);
-        section_header[i].sh_info = lecture4octet(lecteur);
-        section_header[i].sh_addralign = lecture4octet(lecteur);
-        section_header[i].sh_entsize = lecture4octet(lecteur);
+        section_header[i].sh_name = l4o(lecteur);;
+        section_header[i].sh_type = l4o(lecteur);;
+        section_header[i].sh_flags = l4o(lecteur);
+        section_header[i].sh_addr = l4o(lecteur);
+        section_header[i].sh_offset = l4o(lecteur);
+        section_header[i].sh_size = l4o(lecteur);
+        section_header[i].sh_link = l4o(lecteur);
+        section_header[i].sh_info = l4o(lecteur);
+        section_header[i].sh_addralign = l4o(lecteur);
+        section_header[i].sh_entsize = l4o(lecteur);
 
         if(i == elf_header->e_shstrndx){
             adressStringTable = section_header[i].sh_addr+section_header[i].sh_offset;
@@ -110,6 +146,22 @@ ELF_Symbol *init_symbol_table(Lecteur *lecteur, ELF_Header *elf_header, Elf32_Se
 
     int indexSymbolTableSection = getIndexSymbolTableSection(elf_header, sectionHeader);
     int taille = sectionHeader[indexSymbolTableSection].sh_size / 16;
+    int endianness = elf_header->e_ident[5];
+    uint32_t (*l4o)(Lecteur*);
+    uint16_t (*l2o)(Lecteur*);
+    if(endianness == 1){
+        //Little Endian
+        l4o = lecture4octet;
+        l2o = lecture2octet;
+    }else if(endianness == 2){
+        //Big Endian
+        l4o = bigEndianLecture4octet;
+        l2o = bigEndianLecture2octet;
+    }else{
+        //Cas d'erreur
+        fprintf(stderr, "Le format de donnée est invalide");
+        exit(1);
+    }
 
     ELF_Symbol *symbol_table = malloc(sizeof(ELF_Symbol)*taille);
     if(symbol_table == NULL){
@@ -119,12 +171,12 @@ ELF_Symbol *init_symbol_table(Lecteur *lecteur, ELF_Header *elf_header, Elf32_Se
 
     lecteur->adr= sectionHeader[indexSymbolTableSection].sh_offset;
     for(int i = 0; i < taille; i++){
-        symbol_table[i].st_name = lecture4octet(lecteur);
-        symbol_table[i].st_value = lecture4octet(lecteur);
-        symbol_table[i].st_size = lecture4octet(lecteur);
+        symbol_table[i].st_name = l4o(lecteur);
+        symbol_table[i].st_value = l4o(lecteur);
+        symbol_table[i].st_size = l4o(lecteur);
         symbol_table[i].st_info = lecture1octet(lecteur);
         symbol_table[i].st_other = lecture1octet(lecteur);
-        symbol_table[i].st_shndx = lecture2octet(lecteur);
+        symbol_table[i].st_shndx = l2o(lecteur);
 
         if((symbol_table[i].st_info & 0xf) == STT_SECTION){
             symbol_table[i].st_name = sectionHeader[symbol_table[i].st_shndx].sh_name;
@@ -157,6 +209,19 @@ ELF_Rel *init_relocation_table(Lecteur *lecteur, ELF_Header *elf_header, Elf32_S
 
     int i = 0;
     int nb_rel = 0;
+    int endianness = elf_header->e_ident[5];
+    uint32_t (*l4o)(Lecteur*);
+    if(endianness == 1){
+        //Little Endian
+        l4o = lecture4octet;
+    }else if(endianness == 2){
+        //Big Endian
+        l4o = bigEndianLecture4octet;
+    }else{
+        //Cas d'erreur
+        fprintf(stderr, "Le format de donnée est invalide");
+        exit(1);
+    }
 
     //On compte le nombre de sections de relocations
     while( i < elf_header->e_shnum){
@@ -179,8 +244,8 @@ ELF_Rel *init_relocation_table(Lecteur *lecteur, ELF_Header *elf_header, Elf32_S
             lecteur->adr = section_header_tab[i].sh_offset;
             int k = 0;
             while(k < section_header_tab[i].sh_size/8){
-                relocation_table[j].r_offset = lecture4octet(lecteur);
-                relocation_table[j].r_info = lecture4octet(lecteur);
+                relocation_table[j].r_offset = l4o(lecteur);
+                relocation_table[j].r_info = l4o(lecteur);
                 k++;
                 j++;
             }

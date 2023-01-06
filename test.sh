@@ -8,9 +8,9 @@ testHeader(){
 
     if diff resultatObtenu resultatAttendu
     then    
-        echo "[HEADER] OK pour $1"
+        echo -e "\e[48;5;2m[HEADER] OK pour $1\e[0m"
     else
-        echo "[HEADER] ECHEC pour $1"
+        echo -e "\e[48;5;1m[HEADER] ECHEC pour $1\e[0m"
         exit
     fi
 }
@@ -27,7 +27,7 @@ testSectionHeader(){
 
         if [ "$ligneA" != "$ligneO" ]
         then
-            echo "[SECTION HEADER] ECHEC pour $1 à la ligne $i "
+            echo -e "\e[48;5;1m[SECTION HEADER] ECHEC pour $1 à la ligne $i \e[0m"
             echo ""
             echo "Ligne attendu :"
             echo "$ligneA"
@@ -42,10 +42,10 @@ testSectionHeader(){
 
     if [[ `sed -n "$i"p resultatObtenu | wc -w` -eq 0 ]]
     then 
-        echo "[SECTION HEADER] OK pour $1"
+        echo -e "\e[48;5;2m[SECTION HEADER] OK pour $1\e[0m"
         nbVar=$(($i-2))
     else
-        echo "[SECTION HEADER] ECHEC pour $1 : Nombre de lignes différent"
+        echo -e "\e[48;5;1m[SECTION HEADER] ECHEC pour $1 : Nombre de lignes différent\e[0m"
         exit
     fi
     
@@ -64,7 +64,7 @@ testSymbolTable(){
 
         if [ "$ligneA" != "$ligneO" ]
         then
-            echo "[SYMBOL TABLE] ECHEC pour $1 à la ligne $i "
+            echo -e "\e[48;5;1m[SYMBOL TABLE] ECHEC pour $1 à la ligne $i \e[0m"
             echo ""
             echo "Ligne attendu :"
             echo "$ligneA"
@@ -80,9 +80,9 @@ testSymbolTable(){
 
     if [[ `sed -n "$i"p resultatObtenu | wc -w` -eq 0 ]]
     then 
-        echo "[SYMBOL TABLE] OK pour $1"
+        echo -e "\e[48;5;2m[SYMBOL TABLE] OK pour $1\e[0m"
     else
-        echo "[SYMBOL TABLE] ECHEC pour $1 : Nombre de lignes différent"
+        echo -e "\e[48;5;1m[SYMBOL TABLE] ECHEC pour $1 : Nombre de lignes différent\e[0m"
         exit
     fi
  
@@ -103,9 +103,9 @@ testSectionUnique(){
 
         if diff resultatObtenu resultatAttendu
         then    
-            echo "[SECTION UNIQUE - $j ] OK pour $1"
+            echo -e "\e[48;5;2m[SECTION UNIQUE - $j ] OK pour $1\e[0m"
         else
-            echo "[SECTION UNIQUE - $j ] ECHEC pour $1"
+            echo -e "\e[48;5;1m[SECTION UNIQUE - $j ] ECHEC pour $1\e[0m"
             echo "Ligne attendu :"
             echo `cat resultatAttendu`
             echo ""
@@ -129,7 +129,7 @@ testRelocationTable(){
 
         if [ "$ligneA" != "$ligneO" ]
         then
-            echo "[RELOCATION TABLE] ECHEC pour $1 à la ligne $i "
+            echo -e "\e[48;5;1m[RELOCATION TABLE] ECHEC pour $1 à la ligne $i\e[0m "
             echo ""
             echo "Ligne attendu :"
             echo "$ligneA"
@@ -145,9 +145,9 @@ testRelocationTable(){
 
     if [[ `sed -n "$i"p resultatObtenu | wc -w` -eq 0 ]]
     then 
-        echo "[RELOCATION TABLE] OK pour $1"
+        echo -e "\e[48;5;2m[RELOCATION TABLE] OK pour $1\e[0m"
     else
-        echo "[RELOCATION TABLE] ECHEC pour $1 : Nombre de lignes différent"
+        echo -e "\e[48;5;1m[RELOCATION TABLE] ECHEC pour $1 : Nombre de lignes différent\e[0m"
         exit
     fi
  
