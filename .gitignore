@@ -1,5 +1,8 @@
 #Ne pas inclure les .o
 *.o
 .gitignore
+resultatAttendu
+resultatObtenu
+
 #ignore le main executable
 main
