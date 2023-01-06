@@ -44,7 +44,6 @@ ELF_Header *init_header(Lecteur *lect){
     }
     lect->adr=0;
     remplirMagic(lect, elf, EI_NIDENT);
-
     if(elf->e_ident[5] == 1){
         //Little Endian
         l4o = lecture4octet;

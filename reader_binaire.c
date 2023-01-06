@@ -69,8 +69,8 @@ uint32_t bigEndianLecture4octet(Lecteur *lecteur){
     uint32_t octet = 0;
     uint32_t tampon =0;
     if(lecteur->adr < lecteur->size-3){
-        octet = lecture2octet(lecteur);
-        tampon = lecture2octet(lecteur);
+        octet = bigEndianLecture2octet(lecteur);
+        tampon = bigEndianLecture2octet(lecteur);
         octet = (octet << 16)+ tampon;
     }
     return octet; 
