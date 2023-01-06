@@ -17,7 +17,7 @@ int main(int argc, char *argv[]) {
             printf("ERREUR : Le fichier passé en paramètre n'existe pas\n%s",argv[optind]);
             exit(2);
         }
-        exit(1);
+        //exit(1);
 
         fichier2 = fopen(argv[2], "r");
         if(fichier2 == NULL){
@@ -41,8 +41,18 @@ int main(int argc, char *argv[]) {
     ELF_Symbol *symbol_table2 = init_symbol_table(lect2, elf_header2, section_header_tab2);
     ELF_Rel *relocation_table2 = init_relocation_table(lect2, elf_header2, section_header_tab2);
 
-	Lecteur *lect3;
+    Lecteur *lect3 = init_lecteur(lect1->size+lect2->size);
     lect3 = fusion(lect1 ,lect2 , lect3, elf_header1 ,elf_header2 ,section_header_tab1, section_header_tab2, symbol_table1, symbol_table2, relocation_table1, relocation_table2 );
+    // ELF_Header *elf_header3 = init_header(lect3);
+    // Elf32_Section_Header *section_header_tab3 = init_section_header(lect3, elf_header3);
+
+    // afficher_header(elf_header3);
+    //afficher_section_table(lect3, elf_header3, section_header_tab3);
+    // int m = 0;
+    // while(m < 10){
+    //     afficher_section(lect3, section_header_tab3, m);
+    //     m++;
+    // }
 	return 0;
 }
 
