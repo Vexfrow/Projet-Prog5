@@ -214,11 +214,11 @@ void afficher_section_table(Lecteur *lecteur, ELF_Header *elf_header, Elf32_Sect
     int i = 0;
 
     while(i < elf_header->e_shnum){
-        
-        printf("  [%d]%20s\t%s\t%.8hx\t%.6hx\t%06x\t%02x\t", i, getName(lecteur, tab[i].sh_name), getShType(tab[i].sh_type), tab[i].sh_addr, tab[i].sh_offset, tab[i].sh_size, tab[i].sh_entsize);
+        char *name = getName(lecteur, tab[i].sh_name);
+        printf("  [%d]%20s\t%s\t%.8hx\t%.6hx\t%06x\t%02x\t", i, name, getShType(tab[i].sh_type), tab[i].sh_addr, tab[i].sh_offset, tab[i].sh_size, tab[i].sh_entsize);
         afficher_sh_flags(tab[i].sh_flags);
         printf("%d\t%d\t%x",tab[i].sh_link,tab[i].sh_info,tab[i].sh_addralign);
-
+        free(name);
         i++;
         printf("\n");
     }
@@ -228,9 +228,11 @@ void afficher_section_table(Lecteur *lecteur, ELF_Header *elf_header, Elf32_Sect
 
 
 void afficher_section(Lecteur *lecteur, Elf32_Section_Header *section_header_tab, int indexSection){
+    char *name = getName(lecteur, section_header_tab[indexSection].sh_name);
+    printf("Affichage de la section numero %d, de nom %s\n", indexSection, name);
+    //printf("Affichage de la section numero %d\n", indexSection);
 
-    printf("Affichage de la section numero %d, de nom %s\n", indexSection, getName(lecteur, section_header_tab[indexSection].sh_name));
-
+    free(name);
     int size = section_header_tab[indexSection].sh_size;
     if(!size){
         printf("Il n'y a pas de data dans cette section ");
@@ -411,10 +413,12 @@ void afficherRelocations(Lecteur *lecteur, ELF_Header *elf_header, Elf32_Section
     while(j < elf_header->e_shnum){
         if(section_header_table[j].sh_type == 9){
             i=0;
+            char *name = getName(lecteur, section_header_table[j].sh_name);
             if(section_header_table[j].sh_size/8 == 1)
-                printf("Relocation section '%s' at offset 0x%hx contains %d entry:\n", getName(lecteur, section_header_table[j].sh_name), section_header_table[j].sh_offset,(section_header_table[j].sh_size/8) );
+                printf("Relocation section '%s' at offset 0x%hx contains %d entry:\n",name, section_header_table[j].sh_offset,(section_header_table[j].sh_size/8) );
             else
-                printf("Relocation section '%s' at offset 0x%hx contains %d entries:\n", getName(lecteur, section_header_table[j].sh_name), section_header_table[j].sh_offset,(section_header_table[j].sh_size/8) );
+                printf("Relocation section '%s' at offset 0x%hx contains %d entries:\n", name, section_header_table[j].sh_offset,(section_header_table[j].sh_size/8) );
+            free(name);
             printf("Offset \t Info \t \t Type \t \t Sym.Value \t Symbol's Name\n");
             while(i < (section_header_table[j].sh_size/8)){
                 printf("%.8hx ",relocation_table[nb].r_offset);
@@ -423,8 +427,9 @@ void afficherRelocations(Lecteur *lecteur, ELF_Header *elf_header, Elf32_Section
                 affichertypereloc(type);
                 int value = relocation_table[nb].r_info >> 8;
                 printf("%.8x\t",symbol_table[value].st_value);
-                printf("%s\t",getName(lecteur, symbol_table[value].st_name));
-
+                char *name = getName(lecteur, symbol_table[value].st_name);
+                printf("%s\t",name);
+                free(name);
                 i++;
                 nb++;
                 printf("\n");

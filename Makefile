@@ -17,4 +17,4 @@ reader_binaire.o: reader_binaire.h
 
 afficheur.o: afficheur.h lecteur_fichier.h
 
-fusion.o: fusion.h lecteur_fichier.h reader_binaire.h
+fusion.o: fusion.h lecteur_fichier.h reader_binaire.h afficheur.h

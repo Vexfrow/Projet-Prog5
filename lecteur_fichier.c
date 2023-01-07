@@ -6,22 +6,26 @@
  //-----------------------------------------------------------------------
 
 
-char* getName(Lecteur *lecteur, unsigned int address){
+char *getName(Lecteur *lecteur, unsigned int adress){
     lecteur->adr=0;
-    char name[50];
+    char* name = malloc(sizeof(char)* 30);
 
-    lecteur->adr= address;
-    char c = lecture1octet(lecteur); //ATTENTION SI BUG? CA PUE ICI
+    if(adress >= lecteur->size){
+        fprintf(stderr, "ERREUR : addresse trop grande");
+        exit(20);
+    }
+    lecteur->adr= adress;
+    char c = lecture1octet(lecteur);
 
     int i = 0;
-    while(c != '\0'){
+    while(c != '\0' && adress < lecteur->size){
         name[i] = c;
         i++;
         c = lecture1octet(lecteur);
     }
     name[i] = '\0';
-    char* res = name;
-    return res;
+
+    return name;
 }
 
 

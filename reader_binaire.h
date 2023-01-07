@@ -12,6 +12,7 @@ typedef struct {
 
 Lecteur *init_lecture(FILE *fichier);
 Lecteur *init_lecteur(int taille);
+
 unsigned char lecture1octet(Lecteur *lecteur);
 
 uint16_t lecture2octet(Lecteur *lecteur);

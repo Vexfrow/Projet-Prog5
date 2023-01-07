@@ -11,13 +11,12 @@ int main(int argc, char *argv[]) {
     
     FILE *fichier1;
     FILE *fichier2;
-    if(argc > 2){
+    if(argc == 3){
         fichier1 = fopen(argv[1], "r");
         if(fichier1 == NULL){
             printf("ERREUR : Le fichier passé en paramètre n'existe pas\n%s",argv[optind]);
             exit(2);
         }
-        //exit(1);
 
         fichier2 = fopen(argv[2], "r");
         if(fichier2 == NULL){
@@ -42,7 +41,7 @@ int main(int argc, char *argv[]) {
     ELF_Rel *relocation_table2 = init_relocation_table(lect2, elf_header2, section_header_tab2);
 
     Lecteur *lect3 = init_lecteur(lect1->size+lect2->size);
-    lect3 = fusion(lect1 ,lect2 , lect3, elf_header1 ,elf_header2 ,section_header_tab1, section_header_tab2, symbol_table1, symbol_table2, relocation_table1, relocation_table2 );
+    lect3 = fusion(lect1 ,lect2 ,lect3, elf_header1 ,elf_header2 ,section_header_tab1, section_header_tab2, symbol_table1, symbol_table2, relocation_table1, relocation_table2 );
     // ELF_Header *elf_header3 = init_header(lect3);
     // Elf32_Section_Header *section_header_tab3 = init_section_header(lect3, elf_header3);
 
