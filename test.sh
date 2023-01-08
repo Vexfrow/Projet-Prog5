@@ -155,16 +155,28 @@ testRelocationTable(){
 
 
 
+testFusion(){
+
+    
+
+ 
+}
+
+
+
 make
 for file in ${arrayFile[@]}
 do
+    echo "------------------------------------TEST SUR LE FICHIER "$file" - AFFICHAGE ELF --------------------------------------------------"
     testHeader $file
     testSectionHeader $file
     testSectionUnique $file
     testSymbolTable $file
     testRelocationTable $file
-    echo "--------------------------------------------------------------------------------------"
+    echo "------------------------------------GOOD FOR AFFICHAGE ELF------------------------------------------------------------------------"
+
     
 done
+testFusion
 
 

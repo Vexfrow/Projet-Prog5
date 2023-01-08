@@ -80,9 +80,30 @@ Lecteur *fusion_section(Lecteur *lect1, Lecteur *lect2, Lecteur *lect3, ELF_Head
 
     //On copie les nouvelles données dans le lecteur3
     memcpy(lect3->fichier, lect1->fichier, sizeof(ELF_Header)); //ELF_Header 
-    //A REVOIR CETTE PARTIE POUR L'ENDINESS
-    memcpy(lect3->fichier + 32, (char *) &offsetSh, sizeof(unsigned int)); //maj de l'offset du section header
-    memcpy(lect3->fichier + 48, (char *) &nbSection, sizeof(uint16_t)); //maj du nombre de section
+
+    if(elf_header1->e_ident[5] == 1){
+        memcpy(lect3->fichier + 32, (char *) &offsetSh, sizeof(unsigned int)); //maj de l'offset du section header
+        memcpy(lect3->fichier + 48, (char *) &nbSection, sizeof(uint16_t)); //maj du nombre de section
+    }else if(elf_header1->e_ident[5] == 2){
+        //Gestion du cas où les fichiers sont en big endian (les valeurs dans le lecteur sont aussi en big endian donc il faut adapté notre memcpy pour qu'il puisse copier une valeur à l'origine en little endian en big endian)
+        unsigned int res = 0;
+        res |= ((0x000000ff & offsetSh) << 24);
+        res |= ((0x0000ff00 & offsetSh) << 8);
+        res |= ((0x00ff0000 & offsetSh) >> 8);
+        res |= ((0xff000000 & offsetSh) >> 24);
+        memcpy(lect3->fichier + 32, (char *) &res, sizeof(unsigned int)); //maj de l'offset du section header
+
+        res = 0;
+        res |= ((0x00ff & nbSection) << 8);
+        res |= ((0xff00 & nbSection) >> 8);
+
+        memcpy(lect3->fichier + 48, (char *) &res, sizeof(uint16_t)); //maj de l'offset du section header
+
+    }else{
+        //Cas d'erreur
+        fprintf(stderr, "Endian inconnue\n");
+        exit(1);
+    }
 
 
     for(int i = 0; i < nbSection ;i++){
@@ -100,21 +121,22 @@ Lecteur *fusion_section(Lecteur *lect1, Lecteur *lect2, Lecteur *lect3, ELF_Head
 
     //Pour debuger (CTRL + SHIFT + / pour decommenter tout le bloc): 
 
-    // ELF_Header *h3 = init_header(lect3);
-    // afficher_header(h3);
-    // afficher_section_table(lect3, h3, section_header_tab3);
+    ELF_Header *h3 = init_header(lect3);
+    afficher_header(h3);
+    afficher_section_table(lect3, h3, section_header_tab3);
 
-    // for(int i = 0; i < elf_header1->e_shnum; i++){
-    //     afficher_section(lect3, section_header_tab3, i);
-    //     afficher_section(lect1, section_header_tab1, i);
-    //     if(tabCorres[i] != -1)
-    //         afficher_section(lect2, section_header_tab2, tabCorres[i]);
-    //     printf("-----------------------------------------------------------------------------\n");
-    // }
+    for(int i = 0; i < elf_header1->e_shnum; i++){
+        afficher_section(lect3, section_header_tab3, i);
+        afficher_section(lect1, section_header_tab1, i);
+        if(tabCorres[i] != -1)
+            afficher_section(lect2, section_header_tab2, tabCorres[i]);
+        printf("-----------------------------------------------------------------------------\n");
+    }
 
 
     //On oublie pas de free les tableaux qu'on a utilisés
     free(tabCorres);
+    free(section_header_tab3);
 
     return lect3;
 }
