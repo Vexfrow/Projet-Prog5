@@ -11,4 +11,6 @@ Lecteur *fusion_section(Lecteur *lect1 ,Lecteur *lect2 ,Lecteur *lect3, ELF_Head
 
 int *tableauCorrespondanceIndex(Lecteur *lect1 ,Lecteur *lect2, ELF_Header * elf_header1 ,ELF_Header *elf_header2 ,Elf32_Section_Header *section_header_tab1,Elf32_Section_Header *section_header_tab2);
 
-int isInTab(int *tab, int taille, int value);
+int tabCorresInverse(int *tab, int taille, int value);
+
+unsigned int endianValue(unsigned int valueLittleEndian, int valueELFEndian, int tailleOctet);

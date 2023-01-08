@@ -78,11 +78,12 @@ int main(int argc, char *argv[]) {
     //On inialise toutes les structures necessaires
     Lecteur *lecteur = init_lecture(fichier);
     ELF_Header *elf_header = init_header(lecteur);
-    Elf32_Section_Header *section_header_tab = init_section_header(lecteur, elf_header);
-    ELF_Symbol *symbol_table = init_symbol_table(lecteur, elf_header, section_header_tab);
-    ELF_Rel *relocation_table = init_relocation_table(lecteur, elf_header, section_header_tab);
+
 
     if(all){
+        Elf32_Section_Header *section_header_tab = init_section_header(lecteur, elf_header);
+        ELF_Symbol *symbol_table = init_symbol_table(lecteur, elf_header, section_header_tab);
+        ELF_Rel *relocation_table = init_relocation_table(lecteur, elf_header, section_header_tab);
         afficher_header(elf_header);
         afficher_section_table(lecteur, elf_header, section_header_tab);
         afficherSymbol(lecteur, elf_header, section_header_tab, symbol_table);
@@ -90,18 +91,25 @@ int main(int argc, char *argv[]) {
     }else if(header){
         afficher_header(elf_header);
     }else if (sectionHeader){
+        Elf32_Section_Header *section_header_tab = init_section_header(lecteur, elf_header);
         afficher_section_table(lecteur, elf_header, section_header_tab);
     }else if(symbolTable){
+        Elf32_Section_Header *section_header_tab = init_section_header(lecteur, elf_header);
+        ELF_Symbol *symbol_table = init_symbol_table(lecteur, elf_header, section_header_tab);
         afficherSymbol(lecteur, elf_header, section_header_tab, symbol_table);
     }else if(indexSection){
         if(indexSection <= elf_header->e_shnum){
+            Elf32_Section_Header *section_header_tab = init_section_header(lecteur, elf_header);
             afficher_section(lecteur, section_header_tab, indexSection);
         }else{
-            fprintf(stderr, "readelf: Warning: Section %d was not dumped because it does not exist!", indexSection);
+            fprintf(stderr, "readelf: Warning: Section %d was not dumped because it does not exist!\n", indexSection);
             exit(1);
         }
 
     }else if(relocationTable){
+        Elf32_Section_Header *section_header_tab = init_section_header(lecteur, elf_header);
+        ELF_Symbol *symbol_table = init_symbol_table(lecteur, elf_header, section_header_tab);
+        ELF_Rel *relocation_table = init_relocation_table(lecteur, elf_header, section_header_tab);
         afficherRelocations(lecteur, elf_header, section_header_tab, symbol_table, relocation_table);
     }
 

@@ -86,15 +86,12 @@ ELF_Header *init_header(Lecteur *lect){
 //-----------------------SECTION HEADER ------------------------------------
 
 Elf32_Section_Header *init_section_header(Lecteur *lecteur, ELF_Header *elf_header){
-
-    lecteur->adr = 5;
-    char endianness = lecture1octet(lecteur);
     
     uint32_t (*l4o)(Lecteur*);
-    if(endianness == 1){
+    if(elf_header->e_ident[5] == 1){
         //Little Endian
         l4o = lecture4octet;
-    }else if(endianness == 2){
+    }else if(elf_header->e_ident[5] == 2){
         //Big Endian
         l4o = bigEndianLecture4octet;
     }else{
@@ -111,7 +108,7 @@ Elf32_Section_Header *init_section_header(Lecteur *lecteur, ELF_Header *elf_head
     }
 
     int i = 0;
-    unsigned int adressStringTable;
+    unsigned int adressStringTable = 0;
     while ( i < elf_header->e_shnum){
         lecteur->adr = elf_header->e_shoff + elf_header->e_shentsize*(i);
         section_header[i].sh_name = l4o(lecteur);;

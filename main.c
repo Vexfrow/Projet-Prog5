@@ -42,16 +42,25 @@ int main(int argc, char *argv[]) {
 
     Lecteur *lect3 = init_lecteur(lect1->size+lect2->size);
     lect3 = fusion(lect1 ,lect2 ,lect3, elf_header1 ,elf_header2 ,section_header_tab1, section_header_tab2, symbol_table1, symbol_table2, relocation_table1, relocation_table2 );
-    // ELF_Header *elf_header3 = init_header(lect3);
-    // Elf32_Section_Header *section_header_tab3 = init_section_header(lect3, elf_header3);
 
-    // afficher_header(elf_header3);
-    //afficher_section_table(lect3, elf_header3, section_header_tab3);
-    // int m = 0;
-    // while(m < 10){
-    //     afficher_section(lect3, section_header_tab3, m);
-    //     m++;
+    // ELF_Header *h3 = init_header(lect3);
+    // Elf32_Section_Header *section_header_tab3 = init_section_header(lect3, h3);
+    // afficher_header(h3);
+    // afficher_section_table(lect3, h3, section_header_tab3);
+
+    // for(int i = 0; i < elf_header1->e_shnum; i++){
+    //     afficher_section(lect3, section_header_tab3, i);
+    //     afficher_section(lect1, section_header_tab1, i);
+    //     if(tabCorres[i] != -1)
+    //         afficher_section(lect2, section_header_tab2, tabCorres[i]);
+    //     printf("-----------------------------------------------------------------------------\n");
     // }
+
+
+
+
+    ecrireFichier(lect3);
+
 	return 0;
 }
 

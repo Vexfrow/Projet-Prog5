@@ -22,5 +22,7 @@ uint16_t bigEndianLecture2octet(Lecteur *lecteur);
 
 uint32_t bigEndianLecture4octet(Lecteur *lecteur);
 
+void ecrireFichier(Lecteur *lect);
+
 
 #endif 

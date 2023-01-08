@@ -7,7 +7,7 @@ all: main.o affichageElfMain.o lecteur_fichier.o reader_binaire.o afficheur.o fu
 	$(CC) -o affichageElf affichageElfMain.o lecteur_fichier.o reader_binaire.o afficheur.o
 
 
-main.o: lecteur_fichier.h afficheur.h fusion.h
+main.o: lecteur_fichier.h afficheur.h fusion.h reader_binaire.h
 
 affichageElfMain.o: lecteur_fichier.h afficheur.h reader_binaire.o
 

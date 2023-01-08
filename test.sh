@@ -154,10 +154,14 @@ testRelocationTable(){
 }
 
 
-
+#Chose à comparer : -Header -> Tout sauf offset de départ (pour le moment)
 testFusion(){
+    ./main ./tests/file1BigEndian.o ./tests/file2BigEndian.o 
 
-    
+    arm-none-eabi-readelf -h $1 > resultatAttendu
+    ./affichageElf -h $1 | head -n -1  > resultatObtenu
+
+
 
  
 }
