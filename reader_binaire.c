@@ -91,3 +91,31 @@ uint32_t bigEndianLecture4octet(Lecteur *lecteur){
     }
     return octet; 
 }
+
+void ecrirefichier(Lecteur *lecteur){
+
+    FILE* fichier = fopen("file_fusion.o", "wb");
+    if (!fichier){
+        printf("Impossible d'ouvrir le fichier file_fusion.o");
+        exit(0);
+    }
+    else{
+
+    int i =0;
+    char octet;
+    lecteur->adr = 0;
+
+    while (i<=(lecteur->size)){
+            if(!(i%2) && i)
+                printf(" ");
+            if(!(i%16))
+                printf("\n %.8x ",i);
+            octet = lecture1octet(lecteur);
+            fwrite(&octet,1,1,fichier);
+            i++;
+        }
+        printf("\n");
+        fclose(fichier);
+    }
+
+}
