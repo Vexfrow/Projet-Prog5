@@ -81,8 +81,6 @@ ELF_Header *init_header(Lecteur *lect){
 }
 
 
-
-
 //-----------------------SECTION HEADER ------------------------------------
 
 Elf32_Section_Header *init_section_header(Lecteur *lecteur, ELF_Header *elf_header){
@@ -139,7 +137,6 @@ Elf32_Section_Header *init_section_header(Lecteur *lecteur, ELF_Header *elf_head
 
 
 //--------------------SYMBOL TABLE ---------------------------------
-
 
 
 

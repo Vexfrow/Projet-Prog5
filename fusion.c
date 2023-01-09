@@ -13,10 +13,12 @@ Lecteur *fusion(Lecteur *lect1 ,Lecteur *lect2 ,Lecteur *lect3, ELF_Header * elf
         exit(12);
     }
     
-    
     lect3 = fusion_section(lect1 ,lect2 ,lect3, elf_header1 ,elf_header2 , section_header_tab1, section_header_tab2);
     //fusion_symbol();
-    //fusion_realloc();
+    ELF_Header *h3 = init_header(lect3);
+    Elf32_Section_Header *section_header_tab3 = init_section_header(lect3, h3);
+    lect3 = fusion_relocation(lect1, lect2, lect3,  section_header_tab1, section_header_tab2, section_header_tab3, elf_header1 ,elf_header2 , h3);
+    
     return lect3;
 }
 
@@ -59,7 +61,7 @@ Lecteur *fusion_section(Lecteur *lect1, Lecteur *lect2, Lecteur *lect3, ELF_Head
         }
     }
 
-//On rajoute les sections présentes dans la deuxieme table des section mais pas dans la première
+    //On rajoute les sections présentes dans la deuxieme table des section mais pas dans la première
     for(int i= 0; i < elf_header2->e_shnum ; i++){
         if(tabCorresInverse(tabCorres, elf_header1->e_shnum, i) == -1){
             section_header_tab3[nbSection].sh_name = section_header_tab2[i].sh_name + (offsetSh - elf_header1->e_shoff) - section_header_tab2[elf_header2->e_shstrndx].sh_offset; // MAJ de l'adresse du nom (passage à une adresse relative)
@@ -216,6 +218,91 @@ unsigned int endianValue(unsigned int valueLittleEndian, int valueELFEndian, int
     }
 
     return res;
+}
+
+int taille_relocation_table(Elf32_Section_Header *section, ELF_Header *elf_header){
+    //int i=0;
+    int nb_rel = 0;
+    // while( i < elf_header->e_shnum){
+    //     if(section_header_tab[i].sh_type == SHT_REL){
+    //         nb_rel = nb_rel + (section_header_tab[i].sh_size/8);
+    //     }
+    //     i++;
+    // }
+    return nb_rel;
+}
+
+int compStringBool(Lecteur *lect1 ,Lecteur *lect2, Elf32_Section_Header *section_header_tab1,Elf32_Section_Header *section_header_tab2, int indice1, int indice2){
+    char *name1 = getName(lect1, section_header_tab1[indice1].sh_name);
+    char *name2 = getName(lect2, section_header_tab2[indice2].sh_name);
+    int res = strcmp(name1,name2) ==0 ;
+    free(name1);
+    free(name2);
+    return res;
+}
+
+couple *corresCouple(Lecteur *lect1, Lecteur *lect2, Lecteur *lect3, Elf32_Section_Header *section_header_tab1, Elf32_Section_Header *section_header_tab2, Elf32_Section_Header *section_header_tab3, ELF_Header *elf_header1, ELF_Header *elf_header2, ELF_Header *elf_header3 ){
+    couple *correspondance = malloc(sizeof(couple)*elf_header3->e_shnum);
+    int i=0;
+    int k = 0;
+
+    while(i < elf_header3->e_shnum){
+        if(section_header_tab3[i].sh_type == SHT_REL){
+            k=0;
+            while(k < elf_header1->e_shnum && !compStringBool(lect3, lect1, section_header_tab3, section_header_tab1, i, k)){
+                k++;
+            }
+            if(k >= elf_header1->e_shnum){
+                correspondance[i].tab1 = -1;
+                correspondance[i].tab2 = -1;
+            }else{
+                correspondance[i].tab1 = k;
+                correspondance[i].tab2 = -1;
+            }
+
+            k=0;
+            while(k < elf_header2->e_shnum && !compStringBool(lect3, lect2, section_header_tab3, section_header_tab2, i, k)){
+                k++;
+            }
+            if(k < elf_header2->e_shnum){
+                correspondance[i].tab2 = k;
+            }
+
+        }else{
+            correspondance[i].tab1 = -1;
+            correspondance[i].tab2 = -1;
+        }
+        fprintf(stderr, "corres %d : %d, %d\n",i, correspondance[i].tab1, correspondance[i].tab2);
+        i++;
+
+    }
+    
+    
+    return correspondance;
+}
+
+
+
+
+Lecteur *fusion_relocation(Lecteur *lect1, Lecteur *lect2, Lecteur *lect3, Elf32_Section_Header *section_header_tab1, Elf32_Section_Header *section_header_tab2, Elf32_Section_Header * section_header_tab3, ELF_Header *elf_header1, ELF_Header *elf_header2, ELF_Header *elf_header3){
+    
+    int i =0;
+    couple *correspondance = corresCouple(lect1, lect2, lect3, section_header_tab1, section_header_tab2, section_header_tab3, elf_header1, elf_header2, elf_header3 );
+
+
+    while(i < elf_header3->e_shnum){
+        if(correspondance[i].tab1 != -1 && correspondance[i].tab2 != -1){
+            memcpy(lect3->fichier + section_header_tab3[i].sh_offset, lect1->fichier + section_header_tab1[correspondance[i].tab1].sh_offset, section_header_tab1[correspondance[i].tab1].sh_size);
+            memcpy(lect3->fichier + section_header_tab3[i].sh_offset + section_header_tab1[correspondance[i].tab1].sh_size , lect2->fichier + section_header_tab2[correspondance[i].tab2].sh_offset, section_header_tab2[correspondance[i].tab2].sh_size);
+        }else if(correspondance[i].tab1 != -1 && correspondance[i].tab2 == -1){
+            memcpy(lect3->fichier + section_header_tab3[i].sh_offset, lect1->fichier + section_header_tab1[correspondance[i].tab1].sh_offset, section_header_tab1[correspondance[i].tab1].sh_size);
+        }else if(correspondance[i].tab1 == -1 && correspondance[i].tab2 != -1){
+            memcpy(lect3->fichier + section_header_tab3[i].sh_offset, lect2->fichier + section_header_tab2[correspondance[i].tab2].sh_offset, section_header_tab2[correspondance[i].tab2].sh_size);
+        }
+        i++;
+    }
+
+    return lect3;
 }
 
 
