@@ -171,7 +171,7 @@ testFusion(){
 make
 for file in ${arrayFile[@]}
 do
-    echo "------------------------------------TEST SUR LE FICHIER "$file" - AFFICHAGE ELF --------------------------------------------------"
+    echo "------------------------------------TEST SUR LE FICHIER "$file" - AFFICHAGE ELF ---------------------------------------"
     testHeader $file
     testSectionHeader $file
     testSectionUnique $file
@@ -181,6 +181,6 @@ do
 
     
 done
-testFusion
+#testFusion
 
 

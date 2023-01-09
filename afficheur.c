@@ -112,8 +112,10 @@ void afficherSymbol(Lecteur *lecteur, ELF_Header *elf_header, Elf32_Section_Head
     int taille = section_header_tab[indexSymbolTableSection].sh_size / 16;
 
     for(int i =0; i < taille; i++){
+        char * name = getName(lecteur, symbol_table[i].st_name);
         char* res = calculNdx(symbol_table[i].st_shndx, elf_header->e_shnum);
-        fprintf(stdout, "%d:\t%.8x %d\t%s\t%s\tDEFAULT\t %s\t %s\t\n", i, symbol_table[i].st_value, symbol_table[i].st_size, getStType(symbol_table[i].st_info & 0xf), getBinding(symbol_table[i].st_info >> 4), res, getName(lecteur, symbol_table[i].st_name));
+        fprintf(stdout, "%d:\t%.8x %d\t%s\t%s\tDEFAULT\t %s\t %s\t\n", i, symbol_table[i].st_value, symbol_table[i].st_size, getStType(symbol_table[i].st_info & 0xf), getBinding(symbol_table[i].st_info >> 4), res,name);
+        free(name);
     }      
     
 }

@@ -111,8 +111,8 @@ Elf32_Section_Header *init_section_header(Lecteur *lecteur, ELF_Header *elf_head
     unsigned int adressStringTable = 0;
     while ( i < elf_header->e_shnum){
         lecteur->adr = elf_header->e_shoff + elf_header->e_shentsize*(i);
-        section_header[i].sh_name = l4o(lecteur);;
-        section_header[i].sh_type = l4o(lecteur);;
+        section_header[i].sh_name = l4o(lecteur);
+        section_header[i].sh_type = l4o(lecteur);
         section_header[i].sh_flags = l4o(lecteur);
         section_header[i].sh_addr = l4o(lecteur);
         section_header[i].sh_offset = l4o(lecteur);
