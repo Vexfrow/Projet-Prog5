@@ -282,26 +282,69 @@ couple *corresCouple(Lecteur *lect1, Lecteur *lect2, Lecteur *lect3, Elf32_Secti
 }
 
 
-
-
 Lecteur *fusion_relocation(Lecteur *lect1, Lecteur *lect2, Lecteur *lect3, Elf32_Section_Header *section_header_tab1, Elf32_Section_Header *section_header_tab2, Elf32_Section_Header * section_header_tab3, ELF_Header *elf_header1, ELF_Header *elf_header2, ELF_Header *elf_header3){
-    
+    int nb_rel=0;
     int i =0;
-    couple *correspondance = corresCouple(lect1, lect2, lect3, section_header_tab1, section_header_tab2, section_header_tab3, elf_header1, elf_header2, elf_header3 );
-
-
+    int k = 0;
+    couple *correspondance = corresCouple(lect1, lect2, lect3, section_header_tab1, section_header_tab2, section_header_tab3, elf_header1, elf_header2, elf_header3);
+    ELF_Rel *rel_tab;
+    int indice1;
+    int indice2;
+    int size;
     while(i < elf_header3->e_shnum){
+        nb_rel=0;
         if(correspondance[i].tab1 != -1 && correspondance[i].tab2 != -1){
-            memcpy(lect3->fichier + section_header_tab3[i].sh_offset, lect1->fichier + section_header_tab1[correspondance[i].tab1].sh_offset, section_header_tab1[correspondance[i].tab1].sh_size);
-            memcpy(lect3->fichier + section_header_tab3[i].sh_offset + section_header_tab1[correspondance[i].tab1].sh_size , lect2->fichier + section_header_tab2[correspondance[i].tab2].sh_offset, section_header_tab2[correspondance[i].tab2].sh_size);
+            indice1 = section_header_tab1[correspondance[i].tab1].sh_size/8;
+            indice2 = section_header_tab2[correspondance[i].tab2].sh_size/8;
+            nb_rel = indice1+ indice2;
+            rel_tab = malloc(sizeof(ELF_Rel)*nb_rel);
+            k = 0;
+            lect1->adr = section_header_tab1[correspondance[i].tab1].sh_offset;
+            lect2->adr = section_header_tab2[correspondance[i].tab2].sh_offset;
+            while(k < indice1){
+                rel_tab[k].r_offset = lecture4octet(lect1);
+                rel_tab[k].r_info = lecture4octet(lect1);
+                k++;
+            }
+            while(k < indice1 + indice2){
+                rel_tab[k].r_offset = lecture4octet(lect2);
+                rel_tab[k].r_info = lecture4octet(lect2);
+                k++;
+            }
+            //Modifications
+            size = (indice1+indice2)*8;
+            memcpy(lect3->fichier + section_header_tab3[i].sh_offset, rel_tab, size);
+            free(rel_tab);
         }else if(correspondance[i].tab1 != -1 && correspondance[i].tab2 == -1){
-            memcpy(lect3->fichier + section_header_tab3[i].sh_offset, lect1->fichier + section_header_tab1[correspondance[i].tab1].sh_offset, section_header_tab1[correspondance[i].tab1].sh_size);
+            indice1 = section_header_tab1[correspondance[i].tab1].sh_size/8;
+            rel_tab = malloc(sizeof(ELF_Rel)*indice1);
+            lect1->adr = section_header_tab1[correspondance[i].tab1].sh_offset;
+            k=0;
+            while(k < indice1){
+                rel_tab[k].r_offset = lecture4octet(lect1); //Ne pas modifier quand la rel est seule
+                rel_tab[k].r_info = lecture4octet(lect1); //a modifier avec la string table
+                k++;
+            }
+            size = indice1*8;
+            memcpy(lect3->fichier + section_header_tab3[i].sh_offset, rel_tab, size);
+            free(rel_tab);       
         }else if(correspondance[i].tab1 == -1 && correspondance[i].tab2 != -1){
-            memcpy(lect3->fichier + section_header_tab3[i].sh_offset, lect2->fichier + section_header_tab2[correspondance[i].tab2].sh_offset, section_header_tab2[correspondance[i].tab2].sh_size);
+            indice2 = section_header_tab2[correspondance[i].tab2].sh_size/8;
+            rel_tab = malloc(sizeof(ELF_Rel)*indice2);
+            lect2->adr = section_header_tab2[correspondance[i].tab2].sh_offset;
+            k=0;
+            while(k < indice2){
+                rel_tab[k].r_offset = lecture4octet(lect2); //Ne pas modifier quand la rel est seule
+                rel_tab[k].r_info = lecture4octet(lect2); //a modifier avec la string table
+                k++;
+            }
+            size = indice2*8;
+            memcpy(lect3->fichier + section_header_tab3[i].sh_offset, rel_tab, size);
+            free(rel_tab);  
         }
         i++;
+        
     }
-
     return lect3;
 }
 
