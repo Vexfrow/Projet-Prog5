@@ -7,7 +7,7 @@
 #include "fusion.h"
 
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[]){
     
     FILE *fichier1;
     FILE *fichier2;
@@ -26,7 +26,7 @@ int main(int argc, char *argv[]) {
     }else{
         exit(50);
     }
-
+    
     //On inialise toutes les structures necessaires
     Lecteur *lect1 = init_lecture(fichier1);
     ELF_Header *elf_header1 = init_header(lect1);
@@ -47,4 +47,3 @@ int main(int argc, char *argv[]) {
 
 	return 0;
 }
-

@@ -28,7 +28,6 @@ char *getName(Lecteur *lecteur, unsigned int adress){
     return name;
 }
 
-
  //-----------------------------HEADER------------------------------------
 
 void remplirMagic(Lecteur *lecteur, ELF_Header *Header, int taille){
@@ -79,7 +78,6 @@ ELF_Header *init_header(Lecteur *lect){
 
     return elf;
 }
-
 
 //-----------------------SECTION HEADER ------------------------------------
 
@@ -135,10 +133,7 @@ Elf32_Section_Header *init_section_header(Lecteur *lecteur, ELF_Header *elf_head
 
 }
 
-
 //--------------------SYMBOL TABLE ---------------------------------
-
-
 
 ELF_Symbol *init_symbol_table(Lecteur *lecteur, ELF_Header *elf_header, Elf32_Section_Header *sectionHeader){
 
@@ -187,7 +182,6 @@ ELF_Symbol *init_symbol_table(Lecteur *lecteur, ELF_Header *elf_header, Elf32_Se
     return symbol_table;
 }
 
-
 int getIndexSymbolTableSection(ELF_Header *elf_header, Elf32_Section_Header *sectionHead){
     int i = 0;
     while( i < elf_header->e_shnum && sectionHead[i].sh_type != SHT_SYMTAB){
@@ -199,7 +193,6 @@ int getIndexSymbolTableSection(ELF_Header *elf_header, Elf32_Section_Header *sec
     }
     return i;
 }
-
 
 //--------------------- RELOCATION TABLE -----------------------------------
 
