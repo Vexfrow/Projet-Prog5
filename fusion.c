@@ -20,9 +20,9 @@ Lecteur *fusion(Lecteur *lect1 ,Lecteur *lect2 ,Lecteur *lect3, ELF_Header * elf
 
 
 
-    // ELF_Header *h3 = init_header(lect3);
-    // Elf32_Section_Header *section_header_tab3 = init_section_header(lect3, h3);
-    // ELF_Symbol *symTab3 = init_symbol_table(lect3, h3, section_header_tab3);
+    ELF_Header *h3 = init_header(lect3);
+    Elf32_Section_Header *section_header_tab3 = init_section_header(lect3, h3);
+    ELF_Symbol *symTab3 = init_symbol_table(lect3, h3, section_header_tab3);
 
 
     //lect3 = fusion_relocation(lect1, lect2, lect3,  section_header_tab1, section_header_tab2, section_header_tab3, elf_header1 ,elf_header2 , h3, symbol_table2, symTab3 );
@@ -163,7 +163,11 @@ Lecteur *fusion_symbol(Lecteur *lect1, Lecteur *lect2, Lecteur *lect3, ELF_Heade
         if(i < taille1){
             //Si local
             if((symbol_table1[i].st_info >> 4) == 0){
-                symbol_tab3[nbSymbol].st_name = symbol_table1[i].st_name - section_header_tab1[section_header_tab1[indexSymbolTableSection1].sh_link].sh_offset;
+                if((symbol_table1[i].st_info & 0xf) == STT_SECTION){
+                    symbol_tab3[nbSymbol].st_name = 0;
+                }else{
+                    symbol_tab3[nbSymbol].st_name = symbol_table1[i].st_name - section_header_tab1[section_header_tab1[indexSymbolTableSection1].sh_link].sh_offset;
+                }
                 symbol_tab3[nbSymbol].st_value = symbol_table1[i].st_value;
                 symbol_tab3[nbSymbol].st_size = symbol_table1[i].st_size;
                 symbol_tab3[nbSymbol].st_info = symbol_table1[i].st_info;
@@ -213,8 +217,12 @@ Lecteur *fusion_symbol(Lecteur *lect1, Lecteur *lect2, Lecteur *lect3, ELF_Heade
             }
         }else{
             //(Si local et (si type = section et qu'il est celibataire) ou (que non section et pas le premier de la deuxième table)) ou (si global et celib) 
-            if((tabCorresInverse(tabCorresSym, taille1, i-taille1) == -1) || (((symbol_table2[i-taille1].st_info >> 4) == 0) && (((symbol_table2[i-taille1].st_info & 0xf) == 3 && tabCorresInverse(tabCorresSym, taille1, i-taille1) == -1) || ((symbol_table2[i-taille1].st_info & 0xf) != 3 && i-taille1 != 0)))){
-                    symbol_tab3[nbSymbol].st_name = symbol_table2[i-taille1].st_name - section_header_tab2[section_header_tab2[indexSymbolTableSection2].sh_link].sh_offset + section_header_tab1[section_header_tab1[indexSymbolTableSection1].sh_link].sh_size;
+            if((tabCorresInverse(tabCorresSym, taille1, i-taille1) == -1) || (((symbol_table2[i-taille1].st_info >> 4) == 0) && (((symbol_table2[i-taille1].st_info & 0xf) == STT_SECTION && tabCorresInverse(tabCorresSym, taille1, i-taille1) == -1) || ((symbol_table2[i-taille1].st_info & 0xf) != STT_SECTION && i-taille1 != 0)))){
+                    if((symbol_table2[i-taille1].st_info & 0xf) == STT_SECTION){
+                        symbol_tab3[nbSymbol].st_name = 0;
+                    }else{
+                        symbol_tab3[nbSymbol].st_name = symbol_table2[i-taille1].st_name - section_header_tab2[section_header_tab2[indexSymbolTableSection2].sh_link].sh_offset + section_header_tab1[section_header_tab1[indexSymbolTableSection1].sh_link].sh_size;
+                    }   
                     symbol_tab3[nbSymbol].st_value = symbol_table2[i-taille1].st_value;
                     symbol_tab3[nbSymbol].st_size = symbol_table2[i-taille1].st_size;
                     symbol_tab3[nbSymbol].st_info = symbol_table2[i-taille1].st_info;
@@ -225,25 +233,28 @@ Lecteur *fusion_symbol(Lecteur *lect1, Lecteur *lect2, Lecteur *lect3, ELF_Heade
         }
     }
 
-
+    int indexSymbolTableSection3 = getIndexSymbolTableSection(elf_header3, section_header_tab3);
 
     for(int i = 0; i < nbSymbol ;i++){
         int res = endianValue(symbol_tab3[i].st_name, elf_header1->e_ident[5], sizeof(uint32_t));
-        memcpy(lect3->fichier + section_header_tab3[getIndexSymbolTableSection(elf_header3, section_header_tab3)].sh_offset + sizeof(ELF_Symbol) *i, (char *) &res, sizeof(unsigned int)); //maj de l'offset du section header
+        memcpy(lect3->fichier + section_header_tab3[indexSymbolTableSection3].sh_offset + sizeof(ELF_Symbol) *i, (char *) &res, sizeof(unsigned int)); //maj de l'offset du section header
         res = endianValue(symbol_tab3[i].st_value, elf_header1->e_ident[5], sizeof(uint32_t));
-        memcpy(lect3->fichier + section_header_tab3[getIndexSymbolTableSection(elf_header3, section_header_tab3)].sh_offset + sizeof(ELF_Symbol)*i + 4, (char *) &res, sizeof(unsigned int)); //maj de l'offset du section header        memcpy(lect3->fichier + offsetSh + 40*i + 8, (char *) &res, sizeof(unsigned int)); //maj de l'offset du section header
+        memcpy(lect3->fichier + section_header_tab3[indexSymbolTableSection3].sh_offset + sizeof(ELF_Symbol)*i + 4, (char *) &res, sizeof(unsigned int)); //maj de l'offset du section header      
         res = endianValue(symbol_tab3[i].st_size, elf_header1->e_ident[5], sizeof(uint32_t));
-        memcpy(lect3->fichier + section_header_tab3[getIndexSymbolTableSection(elf_header3, section_header_tab3)].sh_offset + sizeof(ELF_Symbol)*i + 8, (char *) &res, sizeof(unsigned int)); //maj de l'offset du section header
+        memcpy(lect3->fichier + section_header_tab3[indexSymbolTableSection3].sh_offset + sizeof(ELF_Symbol)*i + 8, (char *) &res, sizeof(unsigned int)); //maj de l'offset du section header
         res = endianValue(symbol_tab3[i].st_info, elf_header1->e_ident[5], sizeof(uint8_t));
-        memcpy(lect3->fichier + section_header_tab3[getIndexSymbolTableSection(elf_header3, section_header_tab3)].sh_offset + sizeof(ELF_Symbol)*i + 12, (char *) &res, sizeof(unsigned int)); //maj de l'offset du section header  
+        memcpy(lect3->fichier + section_header_tab3[indexSymbolTableSection3].sh_offset + sizeof(ELF_Symbol)*i + 12, (char *) &res, sizeof(unsigned int)); //maj de l'offset du section header  
         res = endianValue(symbol_tab3[i].st_other, elf_header1->e_ident[5], sizeof(uint8_t));
-        memcpy(lect3->fichier + section_header_tab3[getIndexSymbolTableSection(elf_header3, section_header_tab3)].sh_offset + sizeof(ELF_Symbol)*i + 13, (char *) &res, sizeof(unsigned int)); //maj de l'offset du section header
+        memcpy(lect3->fichier + section_header_tab3[indexSymbolTableSection3].sh_offset + sizeof(ELF_Symbol)*i + 13, (char *) &res, sizeof(unsigned int)); //maj de l'offset du section header
         res = endianValue(symbol_tab3[i].st_shndx, elf_header1->e_ident[5], sizeof(uint16_t));
-        memcpy(lect3->fichier + section_header_tab3[getIndexSymbolTableSection(elf_header3, section_header_tab3)].sh_offset + sizeof(ELF_Symbol)*i + 14, (char *) &res, sizeof(unsigned int)); //maj de l'offset du section header  
+        memcpy(lect3->fichier + section_header_tab3[indexSymbolTableSection3].sh_offset + sizeof(ELF_Symbol)*i + 14, (char *) &res, sizeof(unsigned int)); //maj de l'offset du section header  
     }
 
-    nbSymbol = endianValue(nbSymbol * 16, elf_header3->e_ident[5], sizeof(uint32_t));
-    memcpy(lect3->fichier + elf_header3->e_shoff + indexSymbolTableSection1 * sizeof(Elf32_Section_Header) + 20, &nbSymbol, sizeof(uint32_t));
+    int res = endianValue(nbSymbol, elf_header3->e_ident[5], sizeof(uint32_t));
+    memcpy(lect3->fichier + elf_header3->e_shoff + indexSymbolTableSection1 * sizeof(Elf32_Section_Header) + 28, &res, sizeof(uint32_t));
+
+    res = endianValue(nbSymbol * 16, elf_header3->e_ident[5], sizeof(uint32_t));
+    memcpy(lect3->fichier + elf_header3->e_shoff + indexSymbolTableSection1 * sizeof(Elf32_Section_Header) + 20, &res, sizeof(uint32_t));
 
 
     free(tabCorresSym);
