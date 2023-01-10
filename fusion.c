@@ -29,9 +29,8 @@ Lecteur *fusion(Lecteur *lect1 ,Lecteur *lect2 ,Lecteur *lect3, ELF_Header * elf
     // afficher_section(lect1,section_header_tab1, elf_header1->e_shstrndx);
     // afficher_section(lect2,section_header_tab2, elf_header2->e_shstrndx);
 
-    lect3 = fusion_relocation(lect1, lect2, lect3,  section_header_tab1, section_header_tab2, section_header_tab3, elf_header1 ,elf_header2 , h3, symbol_table2, symTab3 );
+    lect3 = fusion_relocation(lect1, lect2, lect3,  section_header_tab1, section_header_tab2, section_header_tab3, elf_header1 ,elf_header2 , h3, symbol_table1, symbol_table2, symTab3 );
     
-
     return lect3;
 }
 
@@ -360,7 +359,6 @@ unsigned int endianValue(unsigned int valueLittleEndian, int valueELFEndian, int
 }
 
 
-
 //Permet de mettre à jour le ndx des items dans la table des symboles
 uint32_t majNdx(Lecteur *lect1, Lecteur *lect3, ELF_Header *elf_header2, Elf32_Section_Header *section_header_tab1, Elf32_Section_Header *section_header_tab2, int oldNdx){
 
@@ -388,17 +386,6 @@ uint32_t majNdx(Lecteur *lect1, Lecteur *lect3, ELF_Header *elf_header2, Elf32_S
 
 }
 
-int taille_relocation_table(Elf32_Section_Header *section, ELF_Header *elf_header){
-    //int i=0;
-    int nb_rel = 0;
-    // while( i < elf_header->e_shnum){
-    //     if(section_header_tab[i].sh_type == SHT_REL){
-    //         nb_rel = nb_rel + (section_header_tab[i].sh_size/8);
-    //     }
-    //     i++;
-    // }
-    return nb_rel;
-}
 
 int compStringBool(Lecteur *lect1 ,Lecteur *lect2, Elf32_Section_Header *section_header_tab1,Elf32_Section_Header *section_header_tab2, int indice1, int indice2){
     char *name1 = getName(lect1, section_header_tab1[indice1].sh_name);
@@ -466,7 +453,8 @@ int getIndexSym(Lecteur *lect1, Lecteur *lect2, ELF_Symbol *symTab1, ELF_Symbol 
 
     if(i >= size){
         fprintf(stderr, "Pas de correspondance dans la symTable");
-        exit(1);
+        //exit(1);
+        return 0;
     }
     int res = (((unsigned int)i << 8)| (unsigned int)((unsigned char)info ));
     free(nameSym);
@@ -475,76 +463,101 @@ int getIndexSym(Lecteur *lect1, Lecteur *lect2, ELF_Symbol *symTab1, ELF_Symbol 
 }
 
 
-Lecteur *fusion_relocation(Lecteur *lect1, Lecteur *lect2, Lecteur *lect3, Elf32_Section_Header *section_header_tab1, Elf32_Section_Header *section_header_tab2, Elf32_Section_Header * section_header_tab3, ELF_Header *elf_header1, ELF_Header *elf_header2, ELF_Header *elf_header3, ELF_Symbol *symTab2 ,ELF_Symbol *symTab3){
-    int nb_rel=0;
+Lecteur *fusion_relocation(Lecteur *lect1, Lecteur *lect2, Lecteur *lect3, Elf32_Section_Header *section_header_tab1, Elf32_Section_Header *section_header_tab2, Elf32_Section_Header *section_header_tab3, ELF_Header *elf_header1, ELF_Header *elf_header2, ELF_Header *elf_header3, ELF_Symbol *symTab1, ELF_Symbol *symTab2 ,ELF_Symbol *symTab3){
+
     int i =0;
     int k = 0;
+    int j =0;
+    int adresse = 0;
+    unsigned int tempo;
+    unsigned char type;
+    char *name1;
+    char *name2;
     couple *correspondance = corresCouple(lect1, lect2, lect3, section_header_tab1, section_header_tab2, section_header_tab3, elf_header1, elf_header2, elf_header3);
-    ELF_Rel *rel_tab;
-    int indice1;
-    int indice2;
-    int dimension;
     int indexSymbolTableSection = getIndexSymbolTableSection(elf_header3, section_header_tab3);
     int taille = section_header_tab3[indexSymbolTableSection].sh_size / 16;
-    fprintf(stderr,"tailleSymTab = %d\n", taille);
-    while(i < elf_header3->e_shnum){
-        nb_rel=0;
-        if(correspondance[i].tab1 != -1 && correspondance[i].tab2 != -1){
-            indice1 = section_header_tab1[correspondance[i].tab1].sh_size/8;
-            indice2 = section_header_tab2[correspondance[i].tab2].sh_size/8;
-            nb_rel = indice1+ indice2;
-            rel_tab = calloc( sizeof(ELF_Rel), nb_rel);
-            k = 0;
-            
-            lect1->adr = section_header_tab1[correspondance[i].tab1].sh_offset;
-            lect2->adr = section_header_tab2[correspondance[i].tab2].sh_offset;
-            while(k < indice1){
-                rel_tab[k].r_offset = lecture4octet(lect1);
-                rel_tab[k].r_info = lecture4octet(lect1);
 
-                k++;
+    while(i<elf_header3->e_shnum){
+
+        if(section_header_tab3[i].sh_type == SHT_REL){
+
+            if(correspondance[i].tab1 != -1 && correspondance[i].tab2 != -1){
+                int nb_rel1 = section_header_tab1[correspondance[i].tab1].sh_size/8;
+                int nb_rel2 = section_header_tab2[correspondance[i].tab2].sh_size/8;
+                adresse = section_header_tab2[correspondance[i].tab2].sh_offset+4;
+                lect2->adr = adresse;
+                k = 0;
+                while(k < nb_rel2){
+                    //debut du premier info de la section du fichier2
+                    lect2->adr = (k * 8) + adresse;
+                    tempo = lecture4octet(lect2);
+                    type = tempo;
+                    tempo = tempo >> 8; //indice dans la SymTable du fichier 2
+                    fprintf(stderr,"tempo = %d\n", tempo);
+
+                    j = 0;
+
+                    name1 = getName(lect2, symTab2[tempo].st_name);
+                    name2 = getName(lect3, symTab3[j].st_name);
+
+                    while(j < taille && strcmp(name1,name2)){ //comparaison de nom entre les REL de la section du fichier 2 et les noms de la symTable3 pour sortir l'offset
+                        j++;
+                        if(j < taille){
+                            free(name2);
+                            name2 = getName(lect3, symTab3[j].st_name);
+                        }
+                    }
+                    tempo = j << 8;
+                    fprintf(stderr,"Nouveau tempo = %x\n", tempo);
+
+                    tempo = tempo + (int)type;
+                    free(name2);
+                    free(name1);
+                    memcpy(lect3->fichier + section_header_tab3[i].sh_offset +4+(k+nb_rel1)*8, &tempo, sizeof(unsigned int));
+                    k++;
+                }
+
+
+            }else if(correspondance[i].tab1 == -1 && correspondance[i].tab2 != -1){
+                int nb_rel2 = section_header_tab2[correspondance[i].tab2].sh_size/8;
+                adresse = section_header_tab2[correspondance[i].tab2].sh_offset+4;
+                lect2->adr = adresse;
+                k = 0;
+                while(k < nb_rel2){
+                    //debut du premier info de la section du fichier2
+                    lect2->adr = (k * 8) + adresse;
+                    tempo = lecture4octet(lect2);
+                    type = tempo;
+                    tempo = tempo >> 8; //indice dans la SymTable du fichier 2
+                    fprintf(stderr,"tempo = %d\n", tempo);
+
+                    j = 0;
+
+                    name1 = getName(lect2, symTab2[tempo].st_name);
+                    name2 = getName(lect3, symTab3[j].st_name);
+
+                    while(j < taille && strcmp(name1,name2)){ //comparaison de nom entre les REL de la section du fichier 2 et les noms de la symTable3 pour sortir l'offset
+                        j++;
+                        if(j < taille){
+                            free(name2);
+                            name2 = getName(lect3, symTab3[j].st_name);
+                        }
+                    }
+                    tempo = j << 8;
+                    fprintf(stderr,"Nouveau tempo = %x\n", tempo);
+
+                    tempo = tempo + (int)type;
+                    free(name2);
+                    free(name1);
+                    memcpy(lect3->fichier + section_header_tab3[i].sh_offset +4+k*8, &tempo, sizeof(unsigned int));
+                    k++;
+                }
             }
-            
-            while(k < indice1 + indice2){
-                rel_tab[k].r_offset = lecture4octet(lect2);
-                rel_tab[k].r_info = lecture4octet(lect2);
-                rel_tab[k].r_info = getIndexSym(lect3, lect2, symTab3, symTab2, rel_tab[k].r_info, taille);
-                k++;
-            }
-            //Modifications
-            dimension = (indice1+indice2)*8;
-            memcpy(lect3->fichier + section_header_tab3[i].sh_offset, rel_tab, dimension);
-            free(rel_tab);
-        }else if(correspondance[i].tab1 != -1 && correspondance[i].tab2 == -1){
-            indice1 = section_header_tab1[correspondance[i].tab1].sh_size/8;
-            rel_tab = malloc(sizeof(ELF_Rel)*indice1);
-            lect1->adr = section_header_tab1[correspondance[i].tab1].sh_offset;
-            k=0;
-            while(k < indice1){
-                rel_tab[k].r_offset = lecture4octet(lect1); //Ne pas modifier quand la rel est seule
-                
-                rel_tab[k].r_info = lecture4octet(lect1); //a modifier avec la string table
-                k++;
-            }
-            dimension = indice1*8;
-            memcpy(lect3->fichier + section_header_tab3[i].sh_offset, rel_tab, dimension);
-            free(rel_tab);       
-        }else if(correspondance[i].tab1 == -1 && correspondance[i].tab2 != -1){
-            indice2 = section_header_tab2[correspondance[i].tab2].sh_size/8;
-            rel_tab = malloc(sizeof(ELF_Rel)*indice2);
-            lect2->adr = section_header_tab2[correspondance[i].tab2].sh_offset;
-            k=0;
-            while(k < indice2){
-                rel_tab[k].r_offset = lecture4octet(lect2); //Ne pas modifier quand la rel est seule
-                rel_tab[k].r_info = lecture4octet(lect2); //a modifier avec la string table
-                k++;
-            }
-            dimension = indice2*8;
-            memcpy(lect3->fichier + section_header_tab3[i].sh_offset, rel_tab, dimension);
-            free(rel_tab);  
+
         }
         i++;
-        
     }
+
+
     return lect3;
 }
