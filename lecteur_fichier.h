@@ -81,6 +81,11 @@ ELF_Symbol *init_symbol_table(Lecteur *lecteur, ELF_Header *elf_header, Elf32_Se
 int getIndexSymbolTableSection(ELF_Header *elf_header, Elf32_Section_Header *section_header);
 
 // ----------------------------------------------------------------------------------------
+//Choix d'endianness
+uint32_t (* lect4o(int endianness))(Lecteur*);
+
+uint16_t (* lect2o(int endianness))(Lecteur*);
+
 
 
 #endif

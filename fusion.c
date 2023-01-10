@@ -20,9 +20,9 @@ Lecteur *fusion(Lecteur *lect1 ,Lecteur *lect2 ,Lecteur *lect3, ELF_Header * elf
 
 
 
-    // ELF_Header *h3 = init_header(lect3);
-    // Elf32_Section_Header *section_header_tab3 = init_section_header(lect3, h3);
-    // ELF_Symbol *symTab3 = init_symbol_table(lect3, h3, section_header_tab3);
+     ELF_Header *h3 = init_header(lect3);
+     Elf32_Section_Header *section_header_tab3 = init_section_header(lect3, h3);
+     ELF_Symbol *symTab3 = init_symbol_table(lect3, h3, section_header_tab3);
     // afficher_header(h3);
     // afficher_section_table(lect3, h3, section_header_tab3);
     // afficher_section(lect3,section_header_tab3, h3->e_shstrndx);
@@ -465,7 +465,7 @@ int getIndexSym(Lecteur *lect1, Lecteur *lect2, ELF_Symbol *symTab1, ELF_Symbol 
 
 
 Lecteur *fusion_relocation(Lecteur *lect1, Lecteur *lect2, Lecteur *lect3, Elf32_Section_Header *section_header_tab1, Elf32_Section_Header *section_header_tab2, Elf32_Section_Header *section_header_tab3, ELF_Header *elf_header1, ELF_Header *elf_header2, ELF_Header *elf_header3, ELF_Symbol *symTab1, ELF_Symbol *symTab2 ,ELF_Symbol *symTab3){
-
+    uint32_t (*l4o)(Lecteur*) = lect4o(elf_header3->e_ident[5]);
     int i =0;
     int k = 0;
     int j =0;
@@ -491,7 +491,7 @@ Lecteur *fusion_relocation(Lecteur *lect1, Lecteur *lect2, Lecteur *lect3, Elf32
                 while(k < nb_rel2){
                     //debut du premier info de la section du fichier2
                     lect2->adr = (k * 8) + adresse;
-                    tempo = lecture4octet(lect2);
+                    tempo = l4o(lect2);
                     type = tempo;
                     tempo = tempo >> 8; //indice dans la SymTable du fichier 2
                     fprintf(stderr,"tempo = %d\n", tempo);
@@ -527,7 +527,7 @@ Lecteur *fusion_relocation(Lecteur *lect1, Lecteur *lect2, Lecteur *lect3, Elf32
                 while(k < nb_rel2){
                     //debut du premier info de la section du fichier2
                     lect2->adr = (k * 8) + adresse;
-                    tempo = lecture4octet(lect2);
+                    tempo = l4o(lect2);
                     type = tempo;
                     tempo = tempo >> 8; //indice dans la SymTable du fichier 2
                     fprintf(stderr,"tempo = %d\n", tempo);
