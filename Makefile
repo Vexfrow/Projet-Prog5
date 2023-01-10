@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-Wall -Werror
+CFLAGS=
 
 
 all: main.o affichageElfMain.o lecteur_fichier.o reader_binaire.o afficheur.o fusion.o

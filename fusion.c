@@ -20,9 +20,9 @@ Lecteur *fusion(Lecteur *lect1 ,Lecteur *lect2 ,Lecteur *lect3, ELF_Header * elf
 
 
 
-    ELF_Header *h3 = init_header(lect3);
-    Elf32_Section_Header *section_header_tab3 = init_section_header(lect3, h3);
-    ELF_Symbol *symTab3 = init_symbol_table(lect3, h3, section_header_tab3);
+    // ELF_Header *h3 = init_header(lect3);
+    // Elf32_Section_Header *section_header_tab3 = init_section_header(lect3, h3);
+    // ELF_Symbol *symTab3 = init_symbol_table(lect3, h3, section_header_tab3);
     // afficher_header(h3);
     // afficher_section_table(lect3, h3, section_header_tab3);
     // afficher_section(lect3,section_header_tab3, h3->e_shstrndx);
@@ -180,11 +180,12 @@ Lecteur *fusion_symbol(Lecteur *lect1, Lecteur *lect2, Lecteur *lect3, ELF_Heade
                 nbSymbol++;
             //Sinon global
             }else if(symbol_table1[i].st_info >> 4 == 1){
+
                 //Si il est en couple
                 if(tabCorresSym[i] != -1){
                     //Si les deux sont définis
-                    if(symbol_table1[i].st_shndx != 0 && symbol_table1[tabCorresSym[i]].st_shndx != 0){
-                        fprintf(stderr, "L'edition de lien à échoué (deux symboles globaux de même nom, définis), index %d", i);
+                    if(symbol_table1[i].st_shndx != STN_UNDEF && symbol_table1[tabCorresSym[i]].st_shndx != STN_UNDEF){
+                        fprintf(stderr, "L'edition de lien à échoué (deux symboles globaux de même nom, définis), 1ere table -> index = %d ; 2eme table -> index = %d\n", i,tabCorresSym[i] );
                         exit(1);
                     //Sinon si le premier est indefinis
                     }else if((symbol_table1[i].st_info & 0xf) == 0){
@@ -201,7 +202,7 @@ Lecteur *fusion_symbol(Lecteur *lect1, Lecteur *lect2, Lecteur *lect3, ELF_Heade
                         symbol_tab3[nbSymbol].st_size = symbol_table1[i].st_size;
                         symbol_tab3[nbSymbol].st_info = symbol_table1[i].st_info;
                         symbol_tab3[nbSymbol].st_other = symbol_table1[i].st_other;
-                        symbol_tab3[nbSymbol].st_shndx = majNdx(lect1, lect3, elf_header3, section_header_tab1, section_header_tab3, symbol_table1[tabCorresSym[i]].st_shndx);
+                        symbol_tab3[nbSymbol].st_shndx = symbol_table1[i].st_shndx;
                         
                         nbSymbol++;
                     }
@@ -212,7 +213,7 @@ Lecteur *fusion_symbol(Lecteur *lect1, Lecteur *lect2, Lecteur *lect3, ELF_Heade
                     symbol_tab3[nbSymbol].st_size = symbol_table1[i].st_size;
                     symbol_tab3[nbSymbol].st_info = symbol_table1[i].st_info;
                     symbol_tab3[nbSymbol].st_other = symbol_table1[i].st_other;
-                    symbol_tab3[nbSymbol].st_shndx = majNdx(lect1, lect3, elf_header3, section_header_tab1, section_header_tab3, symbol_table1[tabCorresSym[i]].st_shndx);
+                    symbol_tab3[nbSymbol].st_shndx = symbol_table1[i].st_shndx;
 
                     nbSymbol++;
                 }
