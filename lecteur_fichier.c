@@ -171,6 +171,7 @@ ELF_Symbol *init_symbol_table(Lecteur *lecteur, ELF_Header *elf_header, Elf32_Se
         symbol_table[i].st_other = lecture1octet(lecteur);
         symbol_table[i].st_shndx = l2o(lecteur);
 
+
         if((symbol_table[i].st_info & 0xf) == STT_SECTION){
             symbol_table[i].st_name = sectionHeader[symbol_table[i].st_shndx].sh_name;
         }else{

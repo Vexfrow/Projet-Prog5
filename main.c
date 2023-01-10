@@ -14,7 +14,6 @@ int main(int argc, char *argv[]){
     if(argc >= 3){
         for(int i = 1; i+1 <= argc; i++){   
             if(i == 1){
-                printf("file 1 = %s\n", argv[1]);
                 fichier1 = fopen(argv[1], "r");
                 if(fichier1 == NULL){
                     printf("ERREUR : Le fichier passé en paramètre n'existe pas (file 1) : %s\n",argv[1]);
@@ -22,10 +21,8 @@ int main(int argc, char *argv[]){
                 }
                 i++;
             }else{
-                printf("file 1 = file_fusion.o\n");
                 fichier1 = fopen("file_fusion.o", "r");
             }
-            printf("file 2 = %s\n", argv[i]);
             fichier2 = fopen(argv[i], "r");
             if(fichier2 == NULL){
                 printf("ERREUR : Le fichier passé en paramètre n'existe pas (file 2) : %s %d\n",argv[i+1], i+1);
