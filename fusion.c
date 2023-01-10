@@ -25,7 +25,7 @@ Lecteur *fusion(Lecteur *lect1 ,Lecteur *lect2 ,Lecteur *lect3, ELF_Header * elf
     ELF_Symbol *symTab3 = init_symbol_table(lect3, h3, section_header_tab3);
 
 
-    lect3 = fusion_relocation(lect1, lect2, lect3,  section_header_tab1, section_header_tab2, section_header_tab3, elf_header1 ,elf_header2 , h3, symbol_table1, symbol_table2, symTab3 );
+    //lect3 = fusion_relocation(lect1, lect2, lect3,  section_header_tab1, section_header_tab2, section_header_tab3, elf_header1 ,elf_header2 , h3, symbol_table1, symbol_table2, symTab3 );
     
     return lect3;
 }
@@ -429,7 +429,7 @@ couple *corresCouple(Lecteur *lect1, Lecteur *lect2, Lecteur *lect3, Elf32_Secti
             correspondance[i].tab1 = -1;
             correspondance[i].tab2 = -1;
         }
-        fprintf(stderr, "corres %d : %d, %d\n",i, correspondance[i].tab1, correspondance[i].tab2);
+        //fprintf(stderr, "corres %d : %d, %d\n",i, correspondance[i].tab1, correspondance[i].tab2);
         i++;
     }
     
