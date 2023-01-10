@@ -22,20 +22,18 @@ Lecteur *fusion(Lecteur *lect1 ,Lecteur *lect2 ,Lecteur *lect3, ELF_Header * elf
 
     ELF_Header *h3 = init_header(lect3);
     Elf32_Section_Header *section_header_tab3 = init_section_header(lect3, h3);
-
-    afficher_header(h3);
-    afficher_section_table(lect3, h3, section_header_tab3);
+    ELF_Symbol *symTab3 = init_symbol_table(lect3, h3, section_header_tab3);
+    // afficher_header(h3);
+    // afficher_section_table(lect3, h3, section_header_tab3);
     // afficher_section(lect3,section_header_tab3, h3->e_shstrndx);
     // afficher_section(lect1,section_header_tab1, elf_header1->e_shstrndx);
     // afficher_section(lect2,section_header_tab2, elf_header2->e_shstrndx);
 
-    //lect3 = fusion_relocation(lect1, lect2, lect3,  section_header_tab1, section_header_tab2, section_header_tab3, elf_header1 ,elf_header2 , h3);
+    lect3 = fusion_relocation(lect1, lect2, lect3,  section_header_tab1, section_header_tab2, section_header_tab3, elf_header1 ,elf_header2 , h3, symbol_table2, symTab3 );
     
 
     return lect3;
 }
-
-
 
 
 Lecteur *fusion_section(Lecteur *lect1, Lecteur *lect2, Lecteur *lect3, ELF_Header *elf_header1, ELF_Header *elf_header2, Elf32_Section_Header *section_header_tab1, Elf32_Section_Header *section_header_tab2){
@@ -62,7 +60,7 @@ Lecteur *fusion_section(Lecteur *lect1, Lecteur *lect2, Lecteur *lect3, ELF_Head
 
     //On met à jour les information de taille et d'offset des sections
     for(int i = 0; i < elf_header1->e_shnum ; i++){
-        if((section_header_tab1[i].sh_type == SHT_PROGBITS || section_header_tab1[i].sh_type == SHT_STRTAB) && tabCorres[i] != -1){
+        if(tabCorres[i] != -1){
             section_header_tab3[i].sh_size += section_header_tab2[tabCorres[i]].sh_size;
             offsetSh += section_header_tab2[tabCorres[i]].sh_size;
 
@@ -148,10 +146,6 @@ Lecteur *fusion_section(Lecteur *lect1, Lecteur *lect2, Lecteur *lect3, ELF_Head
 
     return lect3;
 }
-
-
-
-
 
 Lecteur *fusion_symbol(Lecteur *lect1, Lecteur *lect2, Lecteur *lect3, ELF_Header *elf_header1, ELF_Header *elf_header2, Elf32_Section_Header *section_header_tab1, Elf32_Section_Header *section_header_tab2, ELF_Symbol *symbol_table1, ELF_Symbol *symbol_table2){
 
@@ -295,7 +289,6 @@ Lecteur *fusion_symbol(Lecteur *lect1, Lecteur *lect2, Lecteur *lect3, ELF_Heade
 }
 
 
-
 //renvoie un tableau qui respecte la règle suivante : t[i] = j , où i est un index du tableau section_header_tab1 et j un index du tableau section_header_tab2 (j = -1 si il n'y a pas de correspondance à i dans section_header_tab2)
 int *tableauCorrespondanceIndex(Lecteur *lect1 ,Lecteur *lect2, ELF_Header * elf_header1 ,ELF_Header *elf_header2 ,Elf32_Section_Header *section_header_tab1,Elf32_Section_Header *section_header_tab2){
     int *tableauCorres = malloc(sizeof(int)*elf_header1->e_shnum);
@@ -323,8 +316,6 @@ int *tableauCorrespondanceIndex(Lecteur *lect1 ,Lecteur *lect2, ELF_Header * elf
 
     return tableauCorres;
 }
-
-
 
 //Même fonction que la précédente mais pour la table des symboles
 int *tableauCorrespondanceIndexSym(Lecteur *lect1 ,Lecteur *lect2, ELF_Header * elf_header1 ,ELF_Header *elf_header2 ,Elf32_Section_Header *section_header_tab1,Elf32_Section_Header *section_header_tab2, ELF_Symbol *symbol_table1, ELF_Symbol *symbol_table2){
@@ -446,11 +437,11 @@ int compStringBool(Lecteur *lect1 ,Lecteur *lect2, Elf32_Section_Header *section
     return res;
 }
 
+
 couple *corresCouple(Lecteur *lect1, Lecteur *lect2, Lecteur *lect3, Elf32_Section_Header *section_header_tab1, Elf32_Section_Header *section_header_tab2, Elf32_Section_Header *section_header_tab3, ELF_Header *elf_header1, ELF_Header *elf_header2, ELF_Header *elf_header3 ){
     couple *correspondance = malloc(sizeof(couple)*elf_header3->e_shnum);
     int i=0;
     int k = 0;
-
     while(i < elf_header3->e_shnum){
         if(section_header_tab3[i].sh_type == SHT_REL){
             k=0;
@@ -464,7 +455,6 @@ couple *corresCouple(Lecteur *lect1, Lecteur *lect2, Lecteur *lect3, Elf32_Secti
                 correspondance[i].tab1 = k;
                 correspondance[i].tab2 = -1;
             }
-
             k=0;
             while(k < elf_header2->e_shnum && !compStringBool(lect3, lect2, section_header_tab3, section_header_tab2, i, k)){
                 k++;
@@ -472,21 +462,48 @@ couple *corresCouple(Lecteur *lect1, Lecteur *lect2, Lecteur *lect3, Elf32_Secti
             if(k < elf_header2->e_shnum){
                 correspondance[i].tab2 = k;
             }
-
         }else{
             correspondance[i].tab1 = -1;
             correspondance[i].tab2 = -1;
         }
+        fprintf(stderr, "corres %d : %d, %d\n",i, correspondance[i].tab1, correspondance[i].tab2);
         i++;
-
     }
     
     
     return correspondance;
 }
 
+int getIndexSym(Lecteur *lect1, Lecteur *lect2, ELF_Symbol *symTab1, ELF_Symbol *symTab2, int info, int size){
+    int indiceTab2 = info >> 8;
+    int  i = 1;
+    char *nameSym = getName(lect2, symTab2[indiceTab2].st_name); //nom du symbol dans le fichier 2
+    fprintf(stderr, "nameSym de %d= %s\n", indiceTab2, nameSym);
+    char *nameFus = getName(lect1, symTab1[i].st_name); //nom du symbole dans la fusion
+    
+    while(i < size && strcmp(nameSym, nameFus)){
+        i++;
+        fprintf(stderr, "nameFus de %d= %s\n",i, nameFus);
+        if(i < size){
+            free(nameFus);
+            fprintf(stderr, "avant vaut  %x\n", symTab1[i].st_name);
+            nameFus = getName(lect1, symTab1[i].st_name);
+            fprintf(stderr, "apres\n");
+        }
+    }
 
-Lecteur *fusion_relocation(Lecteur *lect1, Lecteur *lect2, Lecteur *lect3, Elf32_Section_Header *section_header_tab1, Elf32_Section_Header *section_header_tab2, Elf32_Section_Header * section_header_tab3, ELF_Header *elf_header1, ELF_Header *elf_header2, ELF_Header *elf_header3){
+    if(i >= size){
+        fprintf(stderr, "Pas de correspondance dans la symTable");
+        exit(1);
+    }
+    int res = (((unsigned int)i << 8)| (unsigned int)((unsigned char)info ));
+    free(nameSym);
+    free(nameFus);
+    return res;
+}
+
+
+Lecteur *fusion_relocation(Lecteur *lect1, Lecteur *lect2, Lecteur *lect3, Elf32_Section_Header *section_header_tab1, Elf32_Section_Header *section_header_tab2, Elf32_Section_Header * section_header_tab3, ELF_Header *elf_header1, ELF_Header *elf_header2, ELF_Header *elf_header3, ELF_Symbol *symTab2 ,ELF_Symbol *symTab3){
     int nb_rel=0;
     int i =0;
     int k = 0;
@@ -494,30 +511,37 @@ Lecteur *fusion_relocation(Lecteur *lect1, Lecteur *lect2, Lecteur *lect3, Elf32
     ELF_Rel *rel_tab;
     int indice1;
     int indice2;
-    int size;
+    int dimension;
+    int indexSymbolTableSection = getIndexSymbolTableSection(elf_header3, section_header_tab3);
+    int taille = section_header_tab3[indexSymbolTableSection].sh_size / 16;
+    fprintf(stderr,"tailleSymTab = %d\n", taille);
     while(i < elf_header3->e_shnum){
         nb_rel=0;
         if(correspondance[i].tab1 != -1 && correspondance[i].tab2 != -1){
             indice1 = section_header_tab1[correspondance[i].tab1].sh_size/8;
             indice2 = section_header_tab2[correspondance[i].tab2].sh_size/8;
             nb_rel = indice1+ indice2;
-            rel_tab = malloc(sizeof(ELF_Rel)*nb_rel);
+            rel_tab = calloc( sizeof(ELF_Rel), nb_rel);
             k = 0;
+            
             lect1->adr = section_header_tab1[correspondance[i].tab1].sh_offset;
             lect2->adr = section_header_tab2[correspondance[i].tab2].sh_offset;
             while(k < indice1){
                 rel_tab[k].r_offset = lecture4octet(lect1);
                 rel_tab[k].r_info = lecture4octet(lect1);
+
                 k++;
             }
+            
             while(k < indice1 + indice2){
                 rel_tab[k].r_offset = lecture4octet(lect2);
                 rel_tab[k].r_info = lecture4octet(lect2);
+                rel_tab[k].r_info = getIndexSym(lect3, lect2, symTab3, symTab2, rel_tab[k].r_info, taille);
                 k++;
             }
             //Modifications
-            size = (indice1+indice2)*8;
-            memcpy(lect3->fichier + section_header_tab3[i].sh_offset, rel_tab, size);
+            dimension = (indice1+indice2)*8;
+            memcpy(lect3->fichier + section_header_tab3[i].sh_offset, rel_tab, dimension);
             free(rel_tab);
         }else if(correspondance[i].tab1 != -1 && correspondance[i].tab2 == -1){
             indice1 = section_header_tab1[correspondance[i].tab1].sh_size/8;
@@ -526,11 +550,12 @@ Lecteur *fusion_relocation(Lecteur *lect1, Lecteur *lect2, Lecteur *lect3, Elf32
             k=0;
             while(k < indice1){
                 rel_tab[k].r_offset = lecture4octet(lect1); //Ne pas modifier quand la rel est seule
+                
                 rel_tab[k].r_info = lecture4octet(lect1); //a modifier avec la string table
                 k++;
             }
-            size = indice1*8;
-            memcpy(lect3->fichier + section_header_tab3[i].sh_offset, rel_tab, size);
+            dimension = indice1*8;
+            memcpy(lect3->fichier + section_header_tab3[i].sh_offset, rel_tab, dimension);
             free(rel_tab);       
         }else if(correspondance[i].tab1 == -1 && correspondance[i].tab2 != -1){
             indice2 = section_header_tab2[correspondance[i].tab2].sh_size/8;
@@ -542,8 +567,8 @@ Lecteur *fusion_relocation(Lecteur *lect1, Lecteur *lect2, Lecteur *lect3, Elf32
                 rel_tab[k].r_info = lecture4octet(lect2); //a modifier avec la string table
                 k++;
             }
-            size = indice2*8;
-            memcpy(lect3->fichier + section_header_tab3[i].sh_offset, rel_tab, size);
+            dimension = indice2*8;
+            memcpy(lect3->fichier + section_header_tab3[i].sh_offset, rel_tab, dimension);
             free(rel_tab);  
         }
         i++;
