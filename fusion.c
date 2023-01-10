@@ -19,16 +19,6 @@ Lecteur *fusion(Lecteur *lect1 ,Lecteur *lect2 ,Lecteur *lect3, ELF_Header * elf
     lect3 = fusion_symbol(lect1, lect2, lect3, elf_header1 ,elf_header2, section_header_tab1, section_header_tab2, symbol_table1, symbol_table2);
 
 
-
-    ELF_Header *h3 = init_header(lect3);
-    Elf32_Section_Header *section_header_tab3 = init_section_header(lect3, h3);
-
-    afficher_header(h3);
-    afficher_section_table(lect3, h3, section_header_tab3);
-    // afficher_section(lect3,section_header_tab3, h3->e_shstrndx);
-    // afficher_section(lect1,section_header_tab1, elf_header1->e_shstrndx);
-    // afficher_section(lect2,section_header_tab2, elf_header2->e_shstrndx);
-
     //lect3 = fusion_relocation(lect1, lect2, lect3,  section_header_tab1, section_header_tab2, section_header_tab3, elf_header1 ,elf_header2 , h3);
     
 
@@ -62,7 +52,7 @@ Lecteur *fusion_section(Lecteur *lect1, Lecteur *lect2, Lecteur *lect3, ELF_Head
 
     //On met à jour les information de taille et d'offset des sections
     for(int i = 0; i < elf_header1->e_shnum ; i++){
-        if((section_header_tab1[i].sh_type == SHT_PROGBITS || section_header_tab1[i].sh_type == SHT_STRTAB) && tabCorres[i] != -1){
+        if(tabCorres[i] != -1){
             section_header_tab3[i].sh_size += section_header_tab2[tabCorres[i]].sh_size;
             offsetSh += section_header_tab2[tabCorres[i]].sh_size;
 
@@ -177,19 +167,12 @@ Lecteur *fusion_symbol(Lecteur *lect1, Lecteur *lect2, Lecteur *lect3, ELF_Heade
         if(i < taille1){
             //Si local
             if((symbol_table1[i].st_info >> 4) == 0){
-                symbol_tab3[nbSymbol].st_name = symbol_table1[i].st_name - section_header_tab1[section_header_tab1[getIndexSymbolTableSection(elf_header1, section_header_tab1)].sh_link].sh_offset;
+                symbol_tab3[nbSymbol].st_name = symbol_table1[i].st_name - section_header_tab1[section_header_tab1[indexSymbolTableSection1].sh_link].sh_offset;
                 symbol_tab3[nbSymbol].st_value = symbol_table1[i].st_value;
                 symbol_tab3[nbSymbol].st_size = symbol_table1[i].st_size;
                 symbol_tab3[nbSymbol].st_info = symbol_table1[i].st_info;
                 symbol_tab3[nbSymbol].st_other = symbol_table1[i].st_other;
                 symbol_tab3[nbSymbol].st_shndx = majNdx(lect1, lect3, elf_header3, section_header_tab1, section_header_tab3, symbol_table1[i].st_shndx);
-
-                if((symbol_tab3[i].st_info & 0xf) == STT_SECTION){
-                    symbol_tab3[i].st_name = section_header_tab3[symbol_tab3[i].st_shndx].sh_name;
-                }else{
-                    symbol_tab3[i].st_name = section_header_tab3[section_header_tab3[getIndexSymbolTableSection(elf_header3, section_header_tab3)].sh_link].sh_offset + symbol_tab3[i].st_name;
-                }
-
 
                 nbSymbol++;
             //Sinon global
@@ -202,95 +185,74 @@ Lecteur *fusion_symbol(Lecteur *lect1, Lecteur *lect2, Lecteur *lect3, ELF_Heade
                         exit(1);
                     //Sinon si le premier est indefinis
                     }else if((symbol_table1[i].st_info & 0xf) == 0){
-                        symbol_tab3[nbSymbol].st_name = symbol_table1[i].st_name - section_header_tab1[section_header_tab1[getIndexSymbolTableSection(elf_header1, section_header_tab1)].sh_link].sh_offset;   //C'est NARMOL que ce soit tab1 et pas tab2                    symbol_tab3[nbSymbol].st_value = symbol_table2[tabCorresSym[i]].st_value;
+                        symbol_tab3[nbSymbol].st_name = symbol_table1[i].st_name - section_header_tab1[section_header_tab1[indexSymbolTableSection1].sh_link].sh_offset;   //C'est NARMOL que ce soit tab1 et pas tab2                    symbol_tab3[nbSymbol].st_value = symbol_table2[tabCorresSym[i]].st_value;
                         symbol_tab3[nbSymbol].st_size = symbol_table2[tabCorresSym[i]].st_size;
                         symbol_tab3[nbSymbol].st_info = symbol_table2[tabCorresSym[i]].st_info;
                         symbol_tab3[nbSymbol].st_other = symbol_table2[tabCorresSym[i]].st_other;
-                        symbol_tab3[nbSymbol].st_shndx = majNdx(lect2, lect3, elf_header3, section_header_tab2, section_header_tab3, symbol_table2[tabCorresSym[i]].st_shndx);
-                        symbol_tab3[nbSymbol].st_name = section_header_tab3[section_header_tab3[getIndexSymbolTableSection(elf_header3, section_header_tab3)].sh_link].sh_offset + symbol_tab3[i].st_name;
-                        
+                        symbol_tab3[nbSymbol].st_shndx = majNdx(lect2, lect3, elf_header3, section_header_tab2, section_header_tab3, symbol_table2[tabCorresSym[i]].st_shndx);                        
                         nbSymbol++;
                     //Sinon le deuxième est indefnis
                     }else{
-                        symbol_tab3[nbSymbol].st_name = symbol_table1[i].st_name - section_header_tab1[section_header_tab1[getIndexSymbolTableSection(elf_header1, section_header_tab1)].sh_link].sh_offset;
+                        symbol_tab3[nbSymbol].st_name = symbol_table1[i].st_name - section_header_tab1[section_header_tab1[indexSymbolTableSection1].sh_link].sh_offset;
                         symbol_tab3[nbSymbol].st_value = symbol_table1[i].st_value;
                         symbol_tab3[nbSymbol].st_size = symbol_table1[i].st_size;
                         symbol_tab3[nbSymbol].st_info = symbol_table1[i].st_info;
                         symbol_tab3[nbSymbol].st_other = symbol_table1[i].st_other;
                         symbol_tab3[nbSymbol].st_shndx = majNdx(lect1, lect3, elf_header3, section_header_tab1, section_header_tab3, symbol_table1[tabCorresSym[i]].st_shndx);
                         
-                        if((symbol_tab3[nbSymbol].st_info & 0xf) == STT_SECTION){
-                            symbol_tab3[nbSymbol].st_name = section_header_tab3[symbol_tab3[nbSymbol].st_shndx].sh_name;
-                        }else{
-                            symbol_tab3[nbSymbol].st_name = section_header_tab3[section_header_tab3[getIndexSymbolTableSection(elf_header3, section_header_tab3)].sh_link].sh_offset + symbol_tab3[nbSymbol].st_name;
-                        }
-                                nbSymbol++;
+                        nbSymbol++;
                     }
                 //Sinon il est celibataire
                 }else{
-                    symbol_tab3[nbSymbol].st_name = symbol_table1[i].st_name - section_header_tab1[section_header_tab1[getIndexSymbolTableSection(elf_header1, section_header_tab1)].sh_link].sh_offset;
+                    symbol_tab3[nbSymbol].st_name = symbol_table1[i].st_name - section_header_tab1[section_header_tab1[indexSymbolTableSection1].sh_link].sh_offset;
                     symbol_tab3[nbSymbol].st_value = symbol_table1[i].st_value;
                     symbol_tab3[nbSymbol].st_size = symbol_table1[i].st_size;
                     symbol_tab3[nbSymbol].st_info = symbol_table1[i].st_info;
                     symbol_tab3[nbSymbol].st_other = symbol_table1[i].st_other;
                     symbol_tab3[nbSymbol].st_shndx = majNdx(lect1, lect3, elf_header3, section_header_tab1, section_header_tab3, symbol_table1[tabCorresSym[i]].st_shndx);
-                    if((symbol_tab3[nbSymbol].st_info & 0xf) == STT_SECTION){
-                            symbol_tab3[nbSymbol].st_name = section_header_tab3[symbol_tab3[i].st_shndx].sh_name;
-                        }else{
-                            symbol_tab3[nbSymbol].st_name = section_header_tab3[section_header_tab3[getIndexSymbolTableSection(elf_header3, section_header_tab3)].sh_link].sh_offset + symbol_tab3[nbSymbol].st_name;
-                    }
+
                     nbSymbol++;
                 }
             }
         }else{
-            //Si local et si type = section et qu'il est celibataire ou que non section et pas le premier de la deuxième table 
-            if(((symbol_table2[i-taille1].st_info >> 4) == 0) && (((symbol_table2[i-taille1].st_info & 0xf) == 3 && tabCorresInverse(tabCorresSym, taille1, i-taille1) == -1) || ((symbol_table2[i-taille1].st_info & 0xf) != 3 && i-taille1 != 0))){
-                    symbol_tab3[nbSymbol].st_name = symbol_table2[i-taille1].st_name - section_header_tab2[section_header_tab2[getIndexSymbolTableSection(elf_header2, section_header_tab2)].sh_link].sh_offset;
+            //(Si local et (si type = section et qu'il est celibataire) ou (que non section et pas le premier de la deuxième table)) ou (si global et celib) 
+            if((tabCorresInverse(tabCorresSym, taille1, i-taille1) == -1) || (((symbol_table2[i-taille1].st_info >> 4) == 0) && (((symbol_table2[i-taille1].st_info & 0xf) == 3 && tabCorresInverse(tabCorresSym, taille1, i-taille1) == -1) || ((symbol_table2[i-taille1].st_info & 0xf) != 3 && i-taille1 != 0)))){
+                    symbol_tab3[nbSymbol].st_name = symbol_table2[i-taille1].st_name - section_header_tab2[section_header_tab2[indexSymbolTableSection2].sh_link].sh_offset + section_header_tab1[section_header_tab1[indexSymbolTableSection1].sh_link].sh_size;
                     symbol_tab3[nbSymbol].st_value = symbol_table2[i-taille1].st_value;
                     symbol_tab3[nbSymbol].st_size = symbol_table2[i-taille1].st_size;
                     symbol_tab3[nbSymbol].st_info = symbol_table2[i-taille1].st_info;
                     symbol_tab3[nbSymbol].st_other = symbol_table2[i-taille1].st_other;
                     symbol_tab3[nbSymbol].st_shndx = majNdx(lect2, lect3, elf_header3, section_header_tab2, section_header_tab3, symbol_table2[i-taille1].st_shndx);
-                    
-                    if((symbol_tab3[nbSymbol].st_info & 0xf) == STT_SECTION){
-                            symbol_tab3[nbSymbol].st_name = section_header_tab3[symbol_tab3[nbSymbol].st_shndx].sh_name;
-                        }else{
-                            symbol_tab3[nbSymbol].st_name += section_header_tab3[section_header_tab3[getIndexSymbolTableSection(elf_header3, section_header_tab3)].sh_link].sh_offset + section_header_tab1[section_header_tab1[getIndexSymbolTableSection(elf_header1, section_header_tab1)].sh_link].sh_size;
-                    }
-
                     nbSymbol++;
-            //Sinon global (celib)
-            }else if(tabCorresInverse(tabCorresSym, taille1, i-taille1) == -1){
-                symbol_tab3[nbSymbol].st_name = symbol_table2[i-taille1].st_name - section_header_tab2[section_header_tab2[getIndexSymbolTableSection(elf_header2, section_header_tab2)].sh_link].sh_offset;
-                symbol_tab3[nbSymbol].st_value = symbol_table2[i-taille1].st_value;
-                symbol_tab3[nbSymbol].st_size = symbol_table2[i-taille1].st_size;
-                symbol_tab3[nbSymbol].st_info = symbol_table2[i-taille1].st_info;
-                symbol_tab3[nbSymbol].st_other = symbol_table2[i-taille1].st_other;
-                symbol_tab3[nbSymbol].st_shndx = majNdx(lect2, lect3, elf_header3, section_header_tab2, section_header_tab3, symbol_table2[i-taille1].st_shndx);
-
-                symbol_tab3[nbSymbol].st_name += section_header_tab3[section_header_tab3[getIndexSymbolTableSection(elf_header3, section_header_tab3)].sh_link].sh_offset + section_header_tab1[section_header_tab1[getIndexSymbolTableSection(elf_header1, section_header_tab1)].sh_link].sh_size;
-                
-                nbSymbol++;
             }
         }
     }
 
 
-    //memcpy(lect3->fichier + indexSymbolTableSection1*sizeof() + 20, &nbSymbol, sizeof(uint32_t));
 
+    for(int i = 0; i < nbSymbol ;i++){
+        int res = endianValue(symbol_tab3[i].st_name, elf_header1->e_ident[5], sizeof(uint32_t));
+        memcpy(lect3->fichier + section_header_tab3[getIndexSymbolTableSection(elf_header3, section_header_tab3)].sh_offset + sizeof(ELF_Symbol) *i, (char *) &res, sizeof(unsigned int)); //maj de l'offset du section header
+        res = endianValue(symbol_tab3[i].st_value, elf_header1->e_ident[5], sizeof(uint32_t));
+        memcpy(lect3->fichier + section_header_tab3[getIndexSymbolTableSection(elf_header3, section_header_tab3)].sh_offset + sizeof(ELF_Symbol)*i + 4, (char *) &res, sizeof(unsigned int)); //maj de l'offset du section header        memcpy(lect3->fichier + offsetSh + 40*i + 8, (char *) &res, sizeof(unsigned int)); //maj de l'offset du section header
+        res = endianValue(symbol_tab3[i].st_size, elf_header1->e_ident[5], sizeof(uint32_t));
+        memcpy(lect3->fichier + section_header_tab3[getIndexSymbolTableSection(elf_header3, section_header_tab3)].sh_offset + sizeof(ELF_Symbol)*i + 8, (char *) &res, sizeof(unsigned int)); //maj de l'offset du section header
+        res = endianValue(symbol_tab3[i].st_info, elf_header1->e_ident[5], sizeof(uint8_t));
+        memcpy(lect3->fichier + section_header_tab3[getIndexSymbolTableSection(elf_header3, section_header_tab3)].sh_offset + sizeof(ELF_Symbol)*i + 12, (char *) &res, sizeof(unsigned int)); //maj de l'offset du section header  
+        res = endianValue(symbol_tab3[i].st_other, elf_header1->e_ident[5], sizeof(uint8_t));
+        memcpy(lect3->fichier + section_header_tab3[getIndexSymbolTableSection(elf_header3, section_header_tab3)].sh_offset + sizeof(ELF_Symbol)*i + 13, (char *) &res, sizeof(unsigned int)); //maj de l'offset du section header
+        res = endianValue(symbol_tab3[i].st_shndx, elf_header1->e_ident[5], sizeof(uint16_t));
+        memcpy(lect3->fichier + section_header_tab3[getIndexSymbolTableSection(elf_header3, section_header_tab3)].sh_offset + sizeof(ELF_Symbol)*i + 14, (char *) &res, sizeof(unsigned int)); //maj de l'offset du section header  
+    }
 
-    ELF_Header *h3 = init_header(lect3);
-    nbSymbol = endianValue(nbSymbol * 16, h3->e_ident[5], sizeof(uint32_t));
-    memcpy(lect3->fichier + h3->e_shoff + indexSymbolTableSection1 * sizeof(Elf32_Section_Header) + 20, &nbSymbol, sizeof(uint32_t));
-    Elf32_Section_Header *sh3 = init_section_header(lect3, h3);
-    afficher_section_table(lect3, h3, sh3);
-    //ELF_Symbol *s3 = init_symbol_table(lect3, h3, sh3);
-
-    afficherSymbol(lect3, h3, sh3, symbol_tab3);
+    nbSymbol = endianValue(nbSymbol * 16, elf_header3->e_ident[5], sizeof(uint32_t));
+    memcpy(lect3->fichier + elf_header3->e_shoff + indexSymbolTableSection1 * sizeof(Elf32_Section_Header) + 20, &nbSymbol, sizeof(uint32_t));
 
 
     free(tabCorresSym);
-    //free(symbol_tab3);
+    free(symbol_tab3);
+
+
     return lect3;
 }
 
