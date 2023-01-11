@@ -50,7 +50,7 @@ int main(int argc, char *argv[]){
         }
 
     }else{
-        fprintf(stderr, "ERREUR: PAS ASSEZ D'ARGUMENTS");
+        fprintf(stderr, "ERREUR: PAS ASSEZ D'ARGUMENTS\n");
     }
   
 	return 0;
