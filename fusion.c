@@ -9,7 +9,7 @@ Lecteur *fusion(Lecteur *lect1 ,Lecteur *lect2 ,Lecteur *lect3, ELF_Header * elf
         i++;
     }
     if(i < EI_NIDENT){
-        fprintf(stderr,"Erreur, fichier non fusionnable");
+        fprintf(stderr,"Erreur, fichier non fusionnable\n");
         exit(12);
     }
  
@@ -426,7 +426,7 @@ int getIndexSym(Lecteur *lect1, Lecteur *lect2, ELF_Symbol *symTab1, ELF_Symbol 
         }
     }
     if(i >= size){
-        fprintf(stderr, "Pas de correspondance dans la symTable");
+        fprintf(stderr, "Pas de correspondance dans la symTable\n");
         return 0;
     }
     int res = (((unsigned int)i << 8)| (unsigned int)((unsigned char)info ));

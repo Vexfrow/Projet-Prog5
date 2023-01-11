@@ -24,7 +24,7 @@ char *getBinding(char bind){
                 return "HIPROC";
                 break;
             default:
-                fprintf(stderr, "Erreur de lecture info");
+                fprintf(stderr, "Erreur de lecture info\n");
                 exit(2);
                 break;
     }
@@ -56,7 +56,7 @@ char *getStType(char vis){
             return "HIPROC";
             break;
         default:
-            fprintf(stderr, "Erreur de lecture info");
+            fprintf(stderr, "Erreur de lecture info\n");
             exit(2);
             break;
     }
@@ -92,7 +92,7 @@ char *calculNdx(uint16_t ndx, int taille ){
                     break;
                 default:
                     printf("ndx vaut:%d",ndx);
-                    fprintf(stderr, "Erreur de lecture ndx");
+                    fprintf(stderr, "Erreur de lecture ndx\n");
                     exit(2);
             }
 
@@ -297,7 +297,7 @@ char *getDataEncoding(unsigned char c){
             dataEncoding = "2's complement, big endian";
             break;
         default:
-            fprintf(stderr, "ERREUR: Valeur de data encoding invalide: e_ident[EI_DATA] = 0x%.2hhx", c);
+            fprintf(stderr, "ERREUR: Valeur de data encoding invalide: e_ident[EI_DATA] = 0x%.2hhx\n", c);
             exit(1);
             break;
     }
@@ -314,7 +314,7 @@ char *getVersion(unsigned char c){
             version="1 (current)";
             break;
         default:
-            fprintf(stderr, "ERREUR: Valeur de version invalide: e_ident[EI_VERSION] = 0x%.2hhx", c);
+            fprintf(stderr, "ERREUR: Valeur de version invalide: e_ident[EI_VERSION] = 0x%.2hhx\n", c);
             exit(1);
             break;
     }
