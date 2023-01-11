@@ -446,25 +446,44 @@ Lecteur *fusion_relocation(Lecteur *lect1, Lecteur *lect2, Lecteur *lect3, Elf32
     int i =0;
     int k = 0;
     int j =0;
+    int h = 0;
     int adresse = 0;
     unsigned int tempo;
     unsigned char type;
     char *name1;
     char *name2;
+    int offset = 0;
+    int size =0;
     couple *correspondance = corresCouple(lect1, lect2, lect3, section_header_tab1, section_header_tab2, section_header_tab3, elf_header1, elf_header2, elf_header3);
     int indexSymbolTableSection = getIndexSymbolTableSection(elf_header3, section_header_tab3);
     int taille = section_header_tab3[indexSymbolTableSection].sh_size / 16;
     while(i<elf_header3->e_shnum){
         if(section_header_tab3[i].sh_type == SHT_REL){
             if(correspondance[i].tab1 != -1 && correspondance[i].tab2 != -1){
+                h=1;
+                char *fullstring = getName(lect3, section_header_tab3[i].sh_name);
+                char *substring = getName(lect1, section_header_tab1[h].sh_name);
+                while(h < elf_header1->e_shnum && strstr(fullstring, substring) == NULL){
+                    h++;
+                    if(h < elf_header1->e_shnum){
+                        free(substring);
+                        substring = getName(lect1, section_header_tab1[h].sh_name);
+                    }
+                }
+                free(substring);
+                free(fullstring);
                 int nb_rel1 = section_header_tab1[correspondance[i].tab1].sh_size/8;
                 int nb_rel2 = section_header_tab2[correspondance[i].tab2].sh_size/8;
-                adresse = section_header_tab2[correspondance[i].tab2].sh_offset+4;
+                size = section_header_tab1[h].sh_size;
+                adresse = section_header_tab2[correspondance[i].tab2].sh_offset;
                 lect2->adr = adresse;
                 k = 0;
                 while(k < nb_rel2){
                     //debut du premier info de la section du fichier2
-                    lect2->adr = (k * 8) + adresse;
+                    lect2->adr = (k*8) + adresse;
+                    offset = l4o(lect2);
+                    offset = endianValue(size + offset, elf_header3->e_ident[5], 4);
+                    lect2->adr = (k * 8) + adresse+4;
                     tempo = l4o(lect2);
                     type = tempo;
                     tempo = tempo >> 8; //indice dans la SymTable du fichier 2
@@ -479,21 +498,25 @@ Lecteur *fusion_relocation(Lecteur *lect1, Lecteur *lect2, Lecteur *lect3, Elf32
                         }
                     }
                     tempo = j << 8;
-                    tempo = tempo + (int)type;
+                    tempo = endianValue(tempo + (int)type, elf_header3->e_ident[5], 4);
                     free(name2);
                     free(name1);
+                    memcpy(lect3->fichier + section_header_tab3[i].sh_offset +(k+nb_rel1)*8, &offset, sizeof(unsigned int));
                     memcpy(lect3->fichier + section_header_tab3[i].sh_offset +4+(k+nb_rel1)*8, &tempo, sizeof(unsigned int));
                     k++;
                 }
 
             }else if(correspondance[i].tab1 == -1 && correspondance[i].tab2 != -1){
                 int nb_rel2 = section_header_tab2[correspondance[i].tab2].sh_size/8;
-                adresse = section_header_tab2[correspondance[i].tab2].sh_offset+4;
+                adresse = section_header_tab2[correspondance[i].tab2].sh_offset;
                 lect2->adr = adresse;
                 k = 0;
                 while(k < nb_rel2){
-                    //debut du premier info de la section du fichier2
-                    lect2->adr = (k * 8) + adresse;
+
+                    lect2->adr = (k*8) + adresse;
+                    offset = l4o(lect2);
+                    offset = endianValue(offset, elf_header3->e_ident[5], 4);
+                    lect2->adr = (k * 8) + adresse+4;
                     tempo = l4o(lect2);
                     type = tempo;
                     tempo = tempo >> 8; //indice dans la SymTable du fichier 2
@@ -508,9 +531,10 @@ Lecteur *fusion_relocation(Lecteur *lect1, Lecteur *lect2, Lecteur *lect3, Elf32
                         }
                     }
                     tempo = j << 8;
-                    tempo = tempo + (int)type;
+                    tempo = endianValue(tempo + (int)type, elf_header3->e_ident[5], 4);
                     free(name2);
                     free(name1);
+                    memcpy(lect3->fichier + section_header_tab3[i].sh_offset +k*8, &offset, sizeof(unsigned int));
                     memcpy(lect3->fichier + section_header_tab3[i].sh_offset +4+k*8, &tempo, sizeof(unsigned int));
                     k++;
                 }
