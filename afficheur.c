@@ -429,8 +429,10 @@ void afficherRelocations(Lecteur *lecteur, ELF_Header *elf_header, Elf32_Section
                 unsigned char type = relocation_table[nb].r_info;
                 affichertypereloc(type);
                 int value = relocation_table[nb].r_info >> 8;
-                printf("%.8x\t",symbol_table[value].st_value);
                 char *name = getName(lecteur, symbol_table[value].st_name);
+                if(strcmp(name, ""))
+                    printf("%.8x\t",symbol_table[value].st_value);
+              
                 printf("%s\t",name);
                 free(name);
                 i++;
