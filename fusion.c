@@ -56,6 +56,7 @@ Lecteur *fusion_section(Lecteur *lect1, Lecteur *lect2, Lecteur *lect3, ELF_Head
         if(tabCorres[i] != -1){
             section_header_tab3[i].sh_size += section_header_tab2[tabCorres[i]].sh_size;
             offsetSh += section_header_tab2[tabCorres[i]].sh_size;
+            section_header_tab3[i].sh_addralign = (section_header_tab1[i].sh_addralign >= section_header_tab2[tabCorres[i]].sh_addralign) ? section_header_tab1[i].sh_addralign : section_header_tab2[tabCorres[i]].sh_addralign;
 
             for(int k = 0; k < elf_header1->e_shnum ; k++){
                 if(section_header_tab3[k].sh_offset >= section_header_tab3[i].sh_offset && i != k){
@@ -75,7 +76,7 @@ Lecteur *fusion_section(Lecteur *lect1, Lecteur *lect2, Lecteur *lect3, ELF_Head
             section_header_tab3[nbSection].sh_offset = section_header_tab2[i].sh_offset + (offsetSh - elf_header1->e_shoff); // MAJ de l'offset
             section_header_tab3[nbSection].sh_size = section_header_tab2[i].sh_size;
             section_header_tab3[nbSection].sh_link = tabCorresInverse(tabCorres, elf_header1->e_shnum, section_header_tab2[i].sh_link); //MAJ du link avec le nouvel index du symtab
-            section_header_tab3[nbSection].sh_info = section_header_tab2[i].sh_info;
+            section_header_tab3[nbSection].sh_info = (section_header_tab3[nbSection].sh_type == SHT_REL) ? section_header_tab2[i].sh_info : tabCorresInverse(tabCorres, elf_header1->e_shnum, section_header_tab2[i].sh_info); //MAJ de l'info si la section est une REL
             section_header_tab3[nbSection].sh_addralign = section_header_tab2[i].sh_addralign;
             section_header_tab3[nbSection].sh_entsize = section_header_tab2[i].sh_entsize;
             nbSection++;
