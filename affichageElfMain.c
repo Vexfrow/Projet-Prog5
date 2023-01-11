@@ -14,7 +14,7 @@ void usage() {
     "-x indexTable (afficher le contenue de la table à la position indexTable dans le section header)\n"
     "-s (afficher que la table des symboles)\n"
     "-r (afficher que les tables de relocations)\n"
-    "-help (afficher cette aide)\n\n");
+    "--help (afficher cette aide)\n\n");
 }
 
 
@@ -23,13 +23,13 @@ int main(int argc, char *argv[]) {
 	int all = 0, header = 0, sectionHeader = 0, indexSection = 0, symbolTable = 0, relocationTable = 0;
 
 	struct option longopts[] = {
-		{ "all", no_argument, NULL, 'a' },
-        { "header", no_argument, NULL, 'h' },
-		{ "sectionHeader", no_argument, NULL, 'S' },
-		{ "uniqueSection", required_argument, NULL, 'x' },
-		{ "symbolTable", no_argument, NULL, 's' },
-        { "relocationTable", no_argument, NULL, 'r' },
-        { "help", no_argument, NULL, 'z' },
+		{ "-all", no_argument, NULL, 'a' },
+        { "-header", no_argument, NULL, 'h' },
+		{ "-sectionHeader", no_argument, NULL, 'S' },
+		{ "-uniqueSection", required_argument, NULL, 'x' },
+		{ "-symbolTable", no_argument, NULL, 's' },
+        { "-relocationTable", no_argument, NULL, 'r' },
+        { "-help", no_argument, NULL, 'z' },
 		{ NULL, 0, NULL, 0 }
 	};
 

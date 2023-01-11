@@ -154,16 +154,23 @@ testRelocationTable(){
 }
 
 
-#Chose à comparer : -Header -> Tout sauf offset de départ (pour le moment)
+#Chose à comparer : -Header -> Tout sauf offset de départ (pour le moment) et index de la section header string table (car il peut être différent vu qu'on ne fusionne pas de la même manière)
 testFusion(){
     ./main ./tests/file1BigEndian.o ./tests/file2BigEndian.o 
 
-    arm-none-eabi-readelf -h $1 > resultatAttendu
-    ./affichageElf -h $1 | head -n -1  > resultatObtenu
+    arm-none-eabi-readelf -h ./tests/fusion_result.o | head -n -8 > resultatAttendu  #Onrecupère la première partie (jusqu'a "Start of secton header")
+    arm-none-eabi-readelf -h ./tests/fusion_result.o | tail -n 7 |head -n -1 >> resultatAttendu #On récupère la seconde partie (jusqu'a "Section header string table index")
 
+    ./affichageElf -h file_fusion.o | head -n -9 > resultatObtenu   #Idem
+    ./affichageElf -h file_fusion.o | tail -n 8  | head -n -2 >> resultatObtenu
 
-
- 
+    if diff resultatObtenu resultatAttendu
+    then    
+        echo -e "\e[48;5;2m[FUSION - HEADER] OK pour file_fusion\e[0m"
+    else
+        echo -e "\e[48;5;1m[FUSION - HEADER] ECHEC pour file_fusion\e[0m"
+        exit
+    fi
 }
 
 
@@ -181,6 +188,6 @@ do
 
     
 done
-#testFusion
+testFusion
 
 
