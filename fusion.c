@@ -177,7 +177,7 @@ Lecteur *fusion_symbol(Lecteur *lect1, Lecteur *lect2, Lecteur *lect3, ELF_Heade
                 if(tabCorresSym[i] != -1){
                     //Si les deux sont définis (EEREUR)
                     if(symbol_table1[i].st_shndx != STN_UNDEF && symbol_table1[tabCorresSym[i]].st_shndx != STN_UNDEF){
-                        fprintf(stderr, "L'edition de lien à échoué (deux symboles globaux de même nom, définis), 1ere table -> index = %d ; 2eme table -> index = %d\n", i,tabCorresSym[i] );
+                        fprintf(stderr, "L'edition de lien à échoué (deux symboles globaux de même nom, définis)\n");
                         exit(1);
                     //Sinon si le premier est indefinis (On récupère les informations contenus dans la deuxième table)
                     }else if((symbol_table1[i].st_info & 0xf) == 0){

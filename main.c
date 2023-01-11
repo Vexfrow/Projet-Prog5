@@ -25,7 +25,7 @@ int main(int argc, char *argv[]){
             }
             fichier2 = fopen(argv[i], "r");
             if(fichier2 == NULL){
-                printf("ERREUR : Le fichier passé en paramètre n'existe pas (file 2) : %s %d\n",argv[i+1], i+1);
+                printf("ERREUR : Le fichier passé en paramètre n'existe pas (file 2) : %s %d\n",argv[i], i);
                 exit(2);
             }
 
