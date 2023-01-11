@@ -24,7 +24,7 @@ char *getBinding(char bind){
                 return "HIPROC";
                 break;
             default:
-                fprintf(stderr, "Erreur de lecture info");
+                fprintf(stderr, "Erreur de lecture info\n");
                 exit(2);
                 break;
     }
@@ -56,7 +56,7 @@ char *getStType(char vis){
             return "HIPROC";
             break;
         default:
-            fprintf(stderr, "Erreur de lecture info");
+            fprintf(stderr, "Erreur de lecture info\n");
             exit(2);
             break;
     }
@@ -92,7 +92,7 @@ char *calculNdx(uint16_t ndx, int taille ){
                     break;
                 default:
                     printf("ndx vaut:%d",ndx);
-                    fprintf(stderr, "Erreur de lecture ndx");
+                    fprintf(stderr, "Erreur de lecture ndx\n");
                     exit(2);
             }
 
@@ -116,7 +116,8 @@ void afficherSymbol(Lecteur *lecteur, ELF_Header *elf_header, Elf32_Section_Head
         char* res = calculNdx(symbol_table[i].st_shndx, elf_header->e_shnum);
         fprintf(stdout, "%d:\t%.8x %d\t%s\t%s\tDEFAULT\t %s\t %s\t\n", i, symbol_table[i].st_value, symbol_table[i].st_size, getStType(symbol_table[i].st_info & 0xf), getBinding(symbol_table[i].st_info >> 4), res,name);
         free(name);
-    }      
+    }
+    fprintf(stdout, "\n\n");     
     
 }
 
@@ -217,7 +218,7 @@ void afficher_section_table(Lecteur *lecteur, ELF_Header *elf_header, Elf32_Sect
 
     while(i < elf_header->e_shnum){
         char *name = getName(lecteur, tab[i].sh_name);
-        printf("  [%d]%20s\t%s\t%.8hx\t%.6hx\t%06x\t%02x\t", i, name, getShType(tab[i].sh_type), tab[i].sh_addr, tab[i].sh_offset, tab[i].sh_size, tab[i].sh_entsize);
+        printf("  [%d]%20s\t%s\t%.8x\t%.6x\t%06x\t%02x\t", i, name, getShType(tab[i].sh_type), tab[i].sh_addr, tab[i].sh_offset, tab[i].sh_size, tab[i].sh_entsize);
         afficher_sh_flags(tab[i].sh_flags);
         printf("%d\t%d\t%x",tab[i].sh_link,tab[i].sh_info,tab[i].sh_addralign);
         free(name);
@@ -247,10 +248,10 @@ void afficher_section(Lecteur *lecteur, Elf32_Section_Header *section_header_tab
                 printf(" ");
             
             if(!(i%16))
-                printf("\n 0x%.8hx ",i);
+                printf("\n 0x%.8x ",i);
             
             octet = lecture1octet(lecteur);
-            printf("%.2hx",octet);
+            printf("%.2hhx",octet);
             i++;
         }
         printf("\n");
@@ -276,7 +277,7 @@ char *getClass(unsigned char c){
             class = "ELF64";
             break;
         default:
-            fprintf(stderr, "ERREUR: Valeur de classe invalide: e_ident[EI_CLASS] = 0x%.2hx\n", c);
+            fprintf(stderr, "ERREUR: Valeur de classe invalide: e_ident[EI_CLASS] = 0x%.2hhx\n", c);
             exit(1);
             break;
     }
@@ -296,7 +297,7 @@ char *getDataEncoding(unsigned char c){
             dataEncoding = "2's complement, big endian";
             break;
         default:
-            fprintf(stderr, "ERREUR: Valeur de data encoding invalide: e_ident[EI_DATA] = 0x%.2hx", c);
+            fprintf(stderr, "ERREUR: Valeur de data encoding invalide: e_ident[EI_DATA] = 0x%.2hhx\n", c);
             exit(1);
             break;
     }
@@ -313,7 +314,7 @@ char *getVersion(unsigned char c){
             version="1 (current)";
             break;
         default:
-            fprintf(stderr, "ERREUR: Valeur de version invalide: e_ident[EI_VERSION] = 0x%.2hx", c);
+            fprintf(stderr, "ERREUR: Valeur de version invalide: e_ident[EI_VERSION] = 0x%.2hhx\n", c);
             exit(1);
             break;
     }
@@ -368,7 +369,7 @@ char *getMachine(uint16_t c){
 
 void afficherMagic(ELF_Header *Header, int taille){
     for(int i =0; i < taille; i++){
-        printf("%.2hx ", Header->e_ident[i]);
+        printf("%.2hhx ", Header->e_ident[i]);
     }
     printf("\n");
 }
@@ -379,7 +380,7 @@ void afficher_header(ELF_Header *Header){
     printf("ELF Header:\n");
     printf("  Magic:   ");
     for(int i =0; i < 16; i++){
-        printf("%.2hx ", Header->e_ident[i]);
+        printf("%.2hhx ", Header->e_ident[i]);
     }
     printf("\n");
     printf("  Class:                             %s\n", getClass(Header->e_ident[EI_CLASS]));
@@ -389,8 +390,8 @@ void afficher_header(ELF_Header *Header){
     printf("  ABI Version:                       %d\n", Header->e_ident[EI_ABIVERSION]);
     printf("  Type:                              %s\n", getType(Header->e_type));
     printf("  Machine:                           %s\n", getMachine(Header->e_machine));
-    printf("  Version:                           0x%hx\n", Header->e_version);
-    printf("  Entry point address:               0x%hx\n", Header->e_entry);
+    printf("  Version:                           0x%x\n", Header->e_version);
+    printf("  Entry point address:               0x%x\n", Header->e_entry);
     printf("  Start of program headers:          %d (bytes into file)\n", Header->e_phoff);
     printf("  Start of section headers:          %d (bytes into file)\n", Header->e_shoff);
     printf("  Flags:                             0x%x, Version5 EABI\n", Header->e_flags);
@@ -417,14 +418,14 @@ void afficherRelocations(Lecteur *lecteur, ELF_Header *elf_header, Elf32_Section
             i=0;
             char *name = getName(lecteur, section_header_table[j].sh_name);
             if(section_header_table[j].sh_size/8 == 1)
-                printf("Relocation section '%s' at offset 0x%hx contains %d entry:\n",name, section_header_table[j].sh_offset,(section_header_table[j].sh_size/8) );
+                printf("Relocation section '%s' at offset 0x%x contains %d entry:\n",name, section_header_table[j].sh_offset,(section_header_table[j].sh_size/8) );
             else
-                printf("Relocation section '%s' at offset 0x%hx contains %d entries:\n", name, section_header_table[j].sh_offset,(section_header_table[j].sh_size/8) );
+                printf("Relocation section '%s' at offset 0x%x contains %d entries:\n", name, section_header_table[j].sh_offset,(section_header_table[j].sh_size/8) );
             free(name);
             printf("Offset \t Info \t \t Type \t \t Sym.Value \t Symbol's Name\n");
             while(i < (section_header_table[j].sh_size/8)){
-                printf("%.8hx ",relocation_table[nb].r_offset);
-                printf("%.8hx\t",relocation_table[nb].r_info);
+                printf("%.8x ",relocation_table[nb].r_offset);
+                printf("%.8x\t",relocation_table[nb].r_info);
                 unsigned char type = relocation_table[nb].r_info;
                 affichertypereloc(type);
                 int value = relocation_table[nb].r_info >> 8;
@@ -491,6 +492,9 @@ void affichertypereloc(unsigned char t) {
     case R_ARM_TLS_DTPMOD32:
         printf("R_ARM_TLS_DTPMOD32 ");
         break;
+    case R_ARM_GLOB_DAT:
+        printf("R_ARM_GLOB_DAT    ");
+        break;
     case R_ARM_TLS_DTPOFF32:
         printf("R_ARM_TLS_DTPOFF32 ");
         break;
@@ -499,9 +503,6 @@ void affichertypereloc(unsigned char t) {
         break;
     case R_ARM_COPY:
         printf("R_ARM_COPY        ");
-        break;
-    case R_ARM_GLOB_DAT:
-        printf("R_ARM_GLOB_DAT    ");
         break;
     case R_ARM_JUMP_SLOT:
         printf("R_ARM_JUMP_SLOT   ");
@@ -551,18 +552,6 @@ void affichertypereloc(unsigned char t) {
     case R_ARM_MOVW_ABS_NC:
         printf("R_ARM_MOVW_ABS_NC ");
         break;
-    case R_ARM_MOVT_ABS:
-        printf("R_ARM_MOVT_ABS    ");
-        break;
-    case R_ARM_MOVW_PREL_NC:
-        printf("R_ARM_MOVW_PREL_NC ");
-        break;
-    case R_ARM_MOVT_PREL:
-        printf("R_ARM_MOVT_PREL   ");
-        break;
-    case R_ARM_THM_MOVW_ABS_NC:
-        printf("R_ARM_THM_MOVW_ABS_NC ");
-        break;
     case R_ARM_THM_MOVT_ABS:
         printf("R_ARM_THM_MOVT_ABS ");
         break;
@@ -589,6 +578,18 @@ void affichertypereloc(unsigned char t) {
         break;
     case R_ARM_REL32_NOI:
         printf("R_ARM_REL32_NOI   ");
+        break;
+    case R_ARM_MOVT_ABS:
+        printf("R_ARM_MOVT_ABS    ");
+        break;
+    case R_ARM_MOVW_PREL_NC:
+        printf("R_ARM_MOVW_PREL_NC ");
+        break;
+    case R_ARM_MOVT_PREL:
+        printf("R_ARM_MOVT_PREL   ");
+        break;
+    case R_ARM_THM_MOVW_ABS_NC:
+        printf("R_ARM_THM_MOVW_ABS_NC ");
         break;
     case R_ARM_ALU_PC_G0_NC:
         printf("R_ARM_ALU_PC_G0_NC ");
@@ -617,18 +618,6 @@ void affichertypereloc(unsigned char t) {
     case R_ARM_LDRS_PC_G1:
         printf("R_ARM_LDRS_PC_G1  ");
         break;
-    case R_ARM_LDRS_PC_G2:
-        printf("R_ARM_LDRS_PC_G2  ");
-        break;
-    case R_ARM_LDC_PC_G0:
-        printf("R_ARM_LDC_PC_G0   ");
-        break;
-    case R_ARM_LDC_PC_G1:
-        printf("R_ARM_LDC_PC_G1   ");
-        break;
-    case R_ARM_LDC_PC_G2:
-        printf("R_ARM_LDC_PC_G2   ");
-        break;
     case R_ARM_ALU_SB_G0_NC:
         printf("R_ARM_ALU_SB_G0_NC ");
         break;
@@ -647,14 +636,11 @@ void affichertypereloc(unsigned char t) {
     case R_ARM_LDR_SB_G0:
         printf("R_ARM_LDR_SB_G0   ");
         break;
-    case R_ARM_LDR_SB_G1:
-        printf("R_ARM_LDR_SB_G1   ");
+    case R_ARM_LDRS_PC_G2:
+        printf("R_ARM_LDRS_PC_G2  ");
         break;
-    case R_ARM_LDR_SB_G2:
-        printf("R_ARM_LDR_SB_G2   ");
-        break;
-    case R_ARM_LDRS_SB_G0:
-        printf("R_ARM_LDRS_SB_G0  ");
+    case R_ARM_LDC_PC_G0:
+        printf("R_ARM_LDC_PC_G0   ");
         break;
     case R_ARM_LDRS_SB_G1:
         printf("R_ARM_LDRS_SB_G1  ");
@@ -668,17 +654,20 @@ void affichertypereloc(unsigned char t) {
     case R_ARM_LDC_SB_G1:
         printf("R_ARM_LDC_SB_G1   ");
         break;
-    case R_ARM_LDC_SB_G2:
-        printf("R_ARM_LDC_SB_G2   ");
+    case R_ARM_LDC_PC_G1:
+        printf("R_ARM_LDC_PC_G1   ");
         break;
-    case R_ARM_MOVW_BREL_NC:
-        printf("R_ARM_MOVW_BREL_NC ");
+    case R_ARM_LDC_PC_G2:
+        printf("R_ARM_LDC_PC_G2   ");
         break;
-    case R_ARM_MOVT_BREL:
-        printf("R_ARM_MOVT_BREL   ");
+    case R_ARM_LDR_SB_G1:
+        printf("R_ARM_LDR_SB_G1   ");
         break;
-    case R_ARM_MOVW_BREL:
-        printf("R_ARM_MOVW_BREL   ");
+    case R_ARM_LDR_SB_G2:
+        printf("R_ARM_LDR_SB_G2   ");
+        break;
+    case R_ARM_LDRS_SB_G0:
+        printf("R_ARM_LDRS_SB_G0  ");
         break;
     case R_ARM_THM_MOVW_BREL_NC:
         printf("R_ARM_THM_MOVW_BREL_NC ");
@@ -691,6 +680,18 @@ void affichertypereloc(unsigned char t) {
         break;
     case R_ARM_TLS_GOTDESC:
         printf("R_ARM_TLS_GOTDESC ");
+        break;
+    case R_ARM_LDC_SB_G2:
+        printf("R_ARM_LDC_SB_G2   ");
+        break;
+    case R_ARM_MOVW_BREL_NC:
+        printf("R_ARM_MOVW_BREL_NC ");
+        break;
+    case R_ARM_MOVT_BREL:
+        printf("R_ARM_MOVT_BREL   ");
+        break;
+    case R_ARM_MOVW_BREL:
+        printf("R_ARM_MOVW_BREL   ");
         break;
     case R_ARM_TLS_CALL:
         printf("R_ARM_TLS_CALL    ");
@@ -722,18 +723,6 @@ void affichertypereloc(unsigned char t) {
     case R_ARM_GNU_VTENTRY:
         printf("R_ARM_GNU_VTENTRY ");
         break;
-    case R_ARM_GNU_VTINHERIT:
-        printf("R_ARM_GNU_VTINHERIT ");
-        break;
-    case R_ARM_TLS_GD32:
-        printf("R_ARM_TLS_GD32    ");
-        break;
-    case R_ARM_TLS_LDM32:
-        printf("R_ARM_TLS_LDM32   ");
-        break;
-    case R_ARM_TLS_LDO32:
-        printf("R_ARM_TLS_LDO32   ");
-        break;
     case R_ARM_TLS_IE32:
         printf("R_ARM_TLS_IE32    ");
         break;
@@ -760,6 +749,18 @@ void affichertypereloc(unsigned char t) {
         break;
     case R_ARM_THM_GOT_BREL12:
         printf("R_ARM_THM_GOT_BREL12 ");
+        break;
+    case R_ARM_GNU_VTINHERIT:
+        printf("R_ARM_GNU_VTINHERIT ");
+        break;
+    case R_ARM_TLS_GD32:
+        printf("R_ARM_TLS_GD32    ");
+        break;
+    case R_ARM_TLS_LDM32:
+        printf("R_ARM_TLS_LDM32   ");
+        break;
+    case R_ARM_TLS_LDO32:
+        printf("R_ARM_TLS_LDO32   ");
         break;
     case R_ARM_IRELATIVE:
         printf("R_ARM_IRELATIVE   ");

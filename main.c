@@ -46,7 +46,7 @@ int main(int argc, char *argv[]){
             lect3 = fusion(lect1 ,lect2 ,lect3, elf_header1 ,elf_header2 ,section_header_tab1, section_header_tab2, symbol_table1, symbol_table2, relocation_table1, relocation_table2 );
 
             ecrireFichier(lect3);
-
+            fprintf(stdout, "La fusion s'est achevée\n");
         }
 
     }else{

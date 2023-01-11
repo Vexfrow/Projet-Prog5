@@ -116,7 +116,6 @@ void ecrireFichier(Lecteur *lecteur){
             fwrite(&octet,1,1,fichier);
             i++;
         }
-        printf("\n");
         fclose(fichier);
     }
 
